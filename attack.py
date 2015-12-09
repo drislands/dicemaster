@@ -598,7 +598,7 @@ def attackDuel(bot, trigger):
 				if hits < 1:
 					if getStatus(opponent)=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-						cur.execute('UPDATE players SET status=\'healthy\' WHERE name=\'%s\'' % opponent)
+						cur.execute('UPDATE players SET status=\'healthy\' WHERE id=%s' % opponent)
 						bot.reply('\00313Shame! As %s\'s stun wears off, you have another chance to .attack!' % opponent)
 					elif getStatus(opponent)=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
@@ -620,13 +620,13 @@ def attackDuel(bot, trigger):
 				else:
 					if getStatus(opponent)=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-						cur.execute('UPDATE players SET status=\'healthy\',curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
-						bot.reply('\00313It is your chance to .attack again while %s is recovering!' % opponent)
+						cur.execute('UPDATE players SET status=\'healthy\',curhp=curhp-%s WHERE id=%s' % (hits,opponent))
+						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (getName(opponent),getCurHP(opponent),getMaxHP(opponent)))
+						bot.reply('\00313It is your chance to .attack again while %s is recovering!' % getName(opponent))
 					elif getStatus(opponent)=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,dice=0,stage=1 WHERE duelid=%s' % (opponent,getCurrentDuel(trigger.nick)))
-						cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+						cur.execute('UPDATE players SET curhp=curhp-%s WHERE id=%s' % (hits,opponent))
+						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (getName(opponent),getCurHP(opponent),getMaxHP(opponent)))
 					else:
 						bot.reply('\00313Something is wrong with the Status column! :o')
 			elif duelResults[8]==4:
@@ -664,13 +664,13 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
 					# grant the loser a reroll and set his HP to max
-					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (loseRerolls,opponent))
+					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (opponent,loseRerolls,rollBoostRate))
 					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
 				# otherwise, just deal the damage
 				else:
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-					cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
+					cur.execute('UPDATE players SET curhp=curhp-%s WHERE id=%s' % (hits,opponent))
 					bot.say('\00313%s: You have %s/%s HP remaining!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
 					bot.reply('\00313Successful riposte! It is your turn to .attack!')
 
@@ -762,7 +762,7 @@ def defendDuel(bot, trigger):
 			if isStun:
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
-					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % opponent)
+					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % opponent)
 					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName(opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
