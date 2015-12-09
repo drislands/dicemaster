@@ -477,7 +477,7 @@ def rejectChallenge(bot, trigger):
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
-		cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
+		cur.execute('SELECT * FROM duels WHERE duelid=%s AND accepted=false', (getCurrentDuel(trigger.nick),))
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
@@ -699,7 +699,7 @@ def defendDuel(bot, trigger):
 				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
 		elif not (duelResults[6]==getID(trigger.nick)):
-			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % duelResults[6])
+			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % getName(duelResults[6]))
 		elif duelResults[8]==1 or duelResults[8]==3 or duelResults[8]==4:
 			bot.reply('\00313It\'s your turn to .attack, not defend!')
 		elif duelResults[8]==2:
@@ -738,23 +738,25 @@ def defendDuel(bot, trigger):
 					if dubDex and tRoll > (duDxTh - 1):
 						spHits = spHits + 2
 						if DEBUG:
-							bot.say('%s: dub hit!' % tRoll)
+							bot.say('\0033%s: dub hit!' % tRoll)
 					else:
 						spHits = spHits = 1
 						if DEBUG:
-							bot.say('%s: hit!' % tRoll)
+							bot.say('\0033%s: hit!' % tRoll)
 				elif negDex and tRoll < (neDxTh + 1):
 					spHits = spHits - 1
 					if DEBUG:
-						bot.say('%s: negative hit!' % tRoll)
+						bot.say('\0033%s: negative hit!' % tRoll)
+				elif DEBUG:
+					bot.say('\0033%s: no hit!' % tRoll)
 				if DEBUG:
-					bot.say('%s total so far!' % spHits)
+					bot.say('\0033%s total so far!' % spHits)
 			spRolls = spRolls + '!'
 			spRolls = re.sub(', !', '', spRolls)
-			bot.reply('\00313%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
+			bot.reply('\0033%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
 			if showHiddenRolls:
 				bot.reply(spRolls)
-				bot.reply('\00313You got a Dex roll of %s. Shhh....' % spHits)
+				bot.reply('\0033You got a Dex roll of %s. Shhh....' % spHits)
 			## duelResults[9] is the Hit roll from last time, and [10] is the Str roll
 			isStun = False
 			isRiposte = False
