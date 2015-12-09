@@ -632,6 +632,7 @@ def attackDuel(bot, trigger):
 			elif duelResults[8]==4:
 				rolls = "Riposte roll: "
 				hits = 0
+				# changing the profile to do Riposte damage
 				setProfile('riposte damage')
 				# this loop rolls dice equal to the difference bewteen the last Attack roll and the last Dex roll
 				for x in range (0,duelResults[9]):
@@ -649,6 +650,8 @@ def attackDuel(bot, trigger):
 					# determine if crit fails count
 					elif negDex and tRoll < (neDxTh + 1):
 						hits = hits - 1
+				# change the profile back
+				setProfile(curProfile)
 				rolls = rolls + '!'
 				rolls = re.sub(', !', '', rolls)
 				bot.reply('\00313%s -- a grand total of *%s riposte damage*!' % (rolls,hits))
