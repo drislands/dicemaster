@@ -459,6 +459,8 @@ def acceptChallenge(bot, trigger):
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges, I\'m afraid. Issue one with \'.challenge <name>\'!')
+		elif waiting[1]==getID(trigger.nick):
+			bot.reply('\00313You can\t accept your own invitation! You fool!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('UPDATE duels SET accepted=true, active=true WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
