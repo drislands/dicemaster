@@ -565,10 +565,10 @@ def attackDuel(bot, trigger):
 				# sets the dice column to the number of hits, to be used with the next .defend command, and changes the turn and the stage
 				else:
 					cur.execute('UPDATE duels SET turn=%s,dice=%s,specialdice=%s,stage=2 WHERE duelid=%s', (opponent,hits,spHits,getCurrentDuel(trigger.nick)))
-					bot.say('\00313%s: it is your turn to .defend!' % opponent) # the hits for Attack and for Strength are stored in the duel data
+					bot.say('\00313%s: it is your turn to .defend!' % getName(opponent)) # the hits for Attack and for Strength are stored in the duel data
 				if showHiddenRolls:
 					bot.reply(spRolls)
-					bot.reply('\00313Grand total of %s for your strength roll. Shh.....', spHits)
+					bot.reply('\00313Grand total of %s for your strength roll. Shh.....', (spHits,))
 			# if it's time to determine your ultimate damage, following a .defend command
 			elif duelResults[8]==3:
 				rolls = "Damage roll: "
