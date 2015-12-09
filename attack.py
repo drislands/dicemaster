@@ -1,8 +1,3 @@
-## TODO: CHANGE players TO HAVE CurrentDuel point DuelID in duels
-## TODO: CHANGE duels SO THAT ALL THE NAMES ARE INSTEAD IDs
-##
-
-
 ## STAGES OF COMBAT, SO FAR
 # 1:	to hit!
 # 2:	to defend!
@@ -14,7 +9,7 @@ from sopel import module
 import MySQLdb
 import re
 import random
-import os
+import string
 
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = True
@@ -447,7 +442,7 @@ def challengePlayer(bot, trigger):
 				favour = trigger.nick
 			else:
 				favour = trigger.group(2)
-			duelID = os.urandom(16)
+			duelID = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
 			cur.execute('INSERT INTO duels VALUES(%s,%s,false,%s,NULL,false,%s,%s,1,0,0);', (getID(trigger.nick), getID(trigger.group(2)),getID(favour),getID(trigger.group(2)),duelID))
 			cur.execute('UPDATE players SET currentduel=%s WHERE id=%s OR id=%s', (duelID,getID(trigger.nick),getID(trigger.group(2))))
 			bot.say('\00313%s: You are officially challenged to a duel by %s! Say \'.accept\' to begin the battle!' % (trigger.group(2),trigger.nick))
