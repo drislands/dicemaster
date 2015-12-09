@@ -503,12 +503,12 @@ def attackDuel(bot, trigger):
 			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getID(trigger.nick))
 			cha = cur.fetchone()
 			if(cha):
-				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
+				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % getName(cha[0]))
 			else:
 				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
 		elif not (duelResults[6]==getID(trigger.nick)):
-			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % duelResults[6])
+			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % getName(duelResults[6]))
 		elif duelResults[8]==2:
 			bot.reply('\00313It\'s your turn to .defend, not attack!')
 		else:
