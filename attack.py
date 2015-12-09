@@ -607,7 +607,7 @@ def attackDuel(bot, trigger):
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
-					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
+					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
@@ -623,7 +623,7 @@ def attackDuel(bot, trigger):
 						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (getName(opponent),getCurHP(opponent),getMaxHP(opponent)))
 						bot.reply('\00313It is your chance to .attack again while %s is recovering!' % getName(opponent))
 					elif getStatus(opponent)=='healthy':
-						cur.execute('UPDATE duels SET turn=%s,dice=0,stage=1 WHERE duelid=%s' % (opponent,getCurrentDuel(trigger.nick)))
+						cur.execute('UPDATE duels SET turn=%s,dice=0,stage=1 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
 						cur.execute('UPDATE players SET curhp=curhp-%s WHERE id=%s' % (hits,opponent))
 						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (getName(opponent),getCurHP(opponent),getMaxHP(opponent)))
 					else:
@@ -661,7 +661,7 @@ def attackDuel(bot, trigger):
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
-					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (trigger.nick,getCurrentDuel(trigger.nick))) 
+					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (trigger.nick,getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
