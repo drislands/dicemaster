@@ -793,7 +793,7 @@ def defendDuel(bot, trigger):
 					cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 					bot.reply('\00313Your armour holds, no damage for %s! It is your turn to .attack!' % getName(opponent))
 				else:
-					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s WHERE %s', (opponent,newDice,getCurrentDuel(trigger.nick)))
+					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (getName(opponent),newDice))
 			db.commit()
 
