@@ -13,6 +13,8 @@ import string
 
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = True
+# whether or not to show debug logs
+DEBUG = True
 
 # connect to the data base, and create a cursor with which to execute queries
 db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
@@ -735,10 +737,18 @@ def defendDuel(bot, trigger):
 				if tRoll > (dexThr - 1):
 					if dubDex and tRoll > (duDxTh - 1):
 						spHits = spHits + 2
+						if DEBUG:
+							bot.say('%s: dub hit!' % tRoll)
 					else:
 						spHits = spHits = 1
+						if DEBUG:
+							bot.say('%s: hit!' % tRoll)
 				elif negDex and tRoll < (neDxTh + 1):
 					spHits = spHits - 1
+					if DEBUG:
+						bot.say('%s: negative hit!' % tRoll)
+				if DEBUG:
+					bot.say('%s total so far!' % spHits)
 			spRolls = spRolls + '!'
 			spRolls = re.sub(', !', '', spRolls)
 			bot.reply('\00313%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
