@@ -21,12 +21,11 @@ db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="di
 cur = db.cursor()
 
 #function to make sure that the db is still connected
-def testDB(bot,myDB,myCur):
+def testDB(myDB,myCur):
 	try:
 		myCur.execute('SELECT * FROM players;')
 	except (AttributeError, MySQLdb.OperationalError):
 		myDB = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
-		bot.reply('Sorry, fell asleep! Now, where were we....')
 
 # set the correct profile
 cur.execute('SELECT currentP FROM currentprofile WHERE ph=1');
@@ -94,7 +93,7 @@ rollBoostRate = 0
 boostToRoll = 0
 
 def setProfile(profile):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT * FROM variableprofiles WHERE name=\'%s\'' % profile)
 	varStats = cur.fetchone()
 	# TODO: LOOK INTO HASHES
@@ -165,67 +164,67 @@ def setProfile(profile):
 setProfile(curProfile)
 # defining regularly used queries as functions
 def getAtt(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT attack FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getDef(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT defense FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getStr(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT strength FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getDex(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT dexterity FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getID(name):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT ID FROM players WHERE name=%s', (name,))
 	return cur.fetchone()[0]
 def getName(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT name FROM players WHERE id=%s' % ID)
 	return cur.fetchone()[0]
 def getMaxHP(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT maxhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getCurHP(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT curhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getActive(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT active FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def doesExist(name):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT * FROM players WHERE name=%s', (name,))
 	return cur.fetchone()
 def getBoosts(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getUsedBoosts(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT Used_Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getRerolls(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getUsedRerolls(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT Used_Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getCurrentDuel(name):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT CurrentDuel FROM players WHERE name=\'%s\'' % name)
 	return cur.fetchone()[0]
 def getStatus(ID):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT Status FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 
@@ -233,7 +232,7 @@ def getStatus(ID):
 # Creates a player with the name of the user who called it, and random stats
 @module.commands('createplayer')
 def createPlayer(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if doesExist(trigger.nick):
 		bot.reply('\00313Your player already exists!')
 	else:
@@ -251,7 +250,7 @@ def createPlayer(bot, trigger):
 # Check Stats
 @module.commands('stats')
 def getStats(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not trigger.group(2):
 		if not doesExist(trigger.nick):
 			bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
@@ -318,7 +317,7 @@ def getStats(bot, trigger):
 # Quick stats
 @module.commands('qstats')
 def getQuickStats(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -333,7 +332,7 @@ def getQuickStats(bot, trigger):
 # List of Players
 @module.commands('players')
 def getPlayers(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	cur.execute('SELECT name FROM players')
 	results = cur.fetchall()
 	if not results:
@@ -346,7 +345,7 @@ def getPlayers(bot, trigger):
 # Reroll your stats
 @module.commands('reroll')
 def rerollStats(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getRerolls(getID(trigger.nick)) < 1:
@@ -367,7 +366,7 @@ def rerollStats(bot, trigger):
 # Boost a stat
 @module.commands('boost')
 def boostStat(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	stat = trigger.group(2)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
@@ -398,7 +397,7 @@ def boostStat(bot, trigger):
 # Trade a reroll for a number of stat points
 @module.commands('trade')
 def tradeReroll(bot, trigger): 
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getRerolls(getID(trigger.nick)) < 1:
@@ -412,7 +411,7 @@ def tradeReroll(bot, trigger):
 # Challenges another player to a duel
 @module.commands('challenge')
 def challengePlayer(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif not doesExist(trigger.group(2)):
@@ -466,7 +465,7 @@ def challengePlayer(bot, trigger):
 # Accepts a duel from another player
 @module.commands('accept')
 def acceptChallenge(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -486,7 +485,7 @@ def acceptChallenge(bot, trigger):
 # Rejects a duel from another player
 @module.commands('reject')
 def rejectChallenge(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -504,7 +503,7 @@ def rejectChallenge(bot, trigger):
 # Attacks a player
 @module.commands('attack')
 def attackDuel(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -696,7 +695,7 @@ def attackDuel(bot, trigger):
 # The defend command!
 @module.commands('defend')
 def defendDuel(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -825,7 +824,7 @@ def defendDuel(bot, trigger):
 # The forfeit command!
 @module.commands('forfeit')
 def forfeitDuel(bot, trigger):
-	testDB(bot,db,cur)
+	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
