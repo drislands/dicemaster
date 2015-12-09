@@ -224,7 +224,7 @@ def getUsedRerolls(ID):
 	return cur.fetchone()[0]
 def getCurrentDuel(name):
 	testDB(db,cur)
-	cur.execute('SELECT CurrentDuel FROM players WHERE name=%s' % name)
+	cur.execute('SELECT CurrentDuel FROM players WHERE name=\'%s\'' % name)
 	return cur.fetchone()[0]
 def getStatus(ID):
 	testDB(db,cur)
