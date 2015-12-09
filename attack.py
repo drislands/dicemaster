@@ -166,21 +166,21 @@ def setProfile(profile):
 # set the current profile to the default one specified in the database
 setProfile(curProfile)
 # defining regularly used queries as functions
-def getAtt(name):
+def getAtt(ID):
 	testDB(db,cur)
-	cur.execute('SELECT attack FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT attack FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getDef(name):
+def getDef(ID):
 	testDB(db,cur)
-	cur.execute('SELECT defense FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT defense FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getStr(name):
+def getStr(ID):
 	testDB(db,cur)
-	cur.execute('SELECT strength FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT strength FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getDex(name):
+def getDex(ID):
 	testDB(db,cur)
-	cur.execute('SELECT dexterity FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT dexterity FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getID(name):
 	testDB(db,cur)
@@ -190,45 +190,45 @@ def getName(ID):
 	testDB(db,cur)
 	cur.execute('SELECT name FROM players WHERE id=%s' % ID)
 	return cur.fetchone()[0]
-def getMaxHP(name):
+def getMaxHP(ID):
 	testDB(db,cur)
-	cur.execute('SELECT maxhp FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT maxhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getCurHP(name):
+def getCurHP(ID):
 	testDB(db,cur)
-	cur.execute('SELECT curhp FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT curhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getActive(name):
+def getActive(ID):
 	testDB(db,cur)
-	cur.execute('SELECT active FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT active FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def doesExist(name):
 	testDB(db,cur)
 	cur.execute('SELECT * FROM players WHERE name=\'%s\'' % name)
 	return cur.fetchone()
-def getBoosts(name):
+def getBoosts(ID):
 	testDB(db,cur)
-	cur.execute('SELECT Boosts FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getUsedBoosts(name):
+def getUsedBoosts(ID):
 	testDB(db,cur)
-	cur.execute('SELECT Used_Boosts FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT Used_Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getRerolls(name):
+def getRerolls(ID):
 	testDB(db,cur)
-	cur.execute('SELECT Rerolls FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getUsedRerolls(name):
+def getUsedRerolls(ID):
 	testDB(db,cur)
-	cur.execute('SELECT Used_Rerolls FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT Used_Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getCurrentDuel(name):
 	testDB(db,cur)
-	cur.execute('SELECT CurrentDuel FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT CurrentDuel FROM players WHERE name=%s' % name)
 	return cur.fetchone()[0]
-def getStatus(name):
+def getStatus(ID):
 	testDB(db,cur)
-	cur.execute('SELECT Status FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT Status FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 
 #### defining more complicated functions that involve queries
@@ -267,13 +267,13 @@ def getStats(bot, trigger):
 			results = cur.fetchone()
 			if results:
 				if results[0]==getID(trigger.nick):
-					opponent = results[1]
+					opponent = getName(results[1])
 					if results[2]:
 						bot.reply('\00313You are currently in a duel with %s.' % opponent)
 					else:
 						bot.reply('\00313You currently are awaiting %s for a response to your challenge.' % opponent)
 				else:
-					opponent = results[0]
+					opponent = getName(results[0])
 					if results[2]:
 						bot.reply('\00313You are currently in a duel with %s.' % opponent)
 					else:
@@ -297,13 +297,15 @@ def getStats(bot, trigger):
 					opponent = results[1]
 					if opponent==getID(trigger.nick):
 						opponent = 'you'
+					else:
+						opponent = getName(opponent)
 					if results[2]:
 						bot.reply('\00313They are currently in a duel with %s.' % opponent)
 					else:
 						bot.reply('\00313They currently are awaiting %s for a response to their challenge.' % opponent)
 				else:
-					opponent = results[0]
-					if opponent==getID(trigger.nick):
+					opponent = getID(results[0])
+					if opponent==trigger.nick:
 						opponent = 'you'
 					if results[2]:
 						bot.reply('\00313They are currently in a duel with %s.' % opponent)
@@ -337,7 +339,7 @@ def rerollStats(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getRerolls(trigger.nick) < 1:
+	elif getRerolls(getID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat rerolls remaining!')
 	else:
 		# generate new stats based on variables set above
@@ -348,7 +350,7 @@ def rerollStats(bot, trigger):
 		dex = random.randint(minDex,maxDex)
 		# remove one reroll and increment the UsedRerolls stat
 		cur.execute('UPDATE players SET attack=%s,defense=%s,strength=%s,dexterity=%s,maxhp=%s,curhp=%s,rerolls=rerolls-1,used_rerolls=used_rerolls+1 WHERE name=\'%s\'' % (att,defense,strength,dex,hp,hp,trigger.nick))
-		bot.reply('\00313You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(trigger.nick),getUsedRerolls(trigger.nick)))
+		bot.reply('\00313You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(getID(trigger.nick)),getUsedRerolls(getID(trigger.nick))))
 		bot.reply('\00313Your new stats are: Attack - %s, Defense - %s, Strength - %s, Dexterity - %s, Max HP - %s. Game on!' % (att,defense,strength,dex,hp))
 		db.commit()
 
@@ -359,26 +361,26 @@ def boostStat(bot, trigger):
 	stat = trigger.group(2)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getBoosts(trigger.nick) < 1:
+	elif getBoosts(getID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat boosts remaining!')
 	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity'):
 		if stat=='attack':
 			cur.execute('UPDATE players SET attack=attack+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(trigger.nick)))
+			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(getID(trigger.nick))))
 		elif stat=='defense':
 			cur.execute('UPDATE players SET defense=defense+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(trigger.nick)))
+			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(getID(trigger.nick))))
 		elif stat=='strength':
 			cur.execute('UPDATE players SET strength=strength+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(trigger.nick)))
+			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(getID(trigger.nick))))
 		elif stat=='dexterity':
 			cur.execute('UPDATE players SET dexterity=dexterity+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(trigger.nick)))
+			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(getID(trigger.nick))))
 		else:
 			cur.execute('UPDATE players SET maxhp=maxhp+%s,curhp=curhp+%s WHERE name=\'%s\'' % trigger.nick)
-			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal,getMaxHP(trigger.nick)))
+			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal,getMaxHP(getID(trigger.nick))))
 		cur.execute('UPDATE players SET boosts=boosts-1,used_boosts=used_boosts+1 WHERE name=\'%s\'' % trigger.nick)
-		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(trigger.nick),getUsedBoosts(trigger.nick)))
+		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(getID(trigger.nick)),getUsedBoosts(getID(trigger.nick))))
 		db.commit()
 	else:
 		bot.reply('\00313Sorry, \'%s\' isn\'t a stat I know of. Try again?' % stat)
@@ -389,12 +391,12 @@ def tradeReroll(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getRerolls(trigger.nick) < 1:
+	elif getRerolls(getID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any rerolls to trade!')
 	else:
 		cur.execute('UPDATE players SET rerolls=rerolls-1,boosts=boosts+%s WHERE name=\'%s\'' % (rollBoostRate,trigger.nick))
-		bot.reply('\00313You now have one fewer reroll, a total of %s remaining.' % getRerolls(trigger.nick))
-		bot.reply('\00313You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(trigger.nick)))
+		bot.reply('\00313You now have one fewer reroll, a total of %s remaining.' % getRerolls(getID(trigger.nick)))
+		bot.reply('\00313You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(getID(trigger.nick))))
 		db.commit()
 
 # Challenges another player to a duel
@@ -439,8 +441,8 @@ def challengePlayer(bot, trigger):
 			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themWaiting[0]))
 		else:
 			# creates the duel data 
-			chaTot = getMaxHP(trigger.nick) + getAtt(trigger.nick) + getDef(trigger.nick) + getStr(trigger.nick) + getDex(trigger.nick)
-			defTot = getMaxHP(trigger.group(2)) + getAtt(trigger.group(2)) + getDef(trigger.group(2)) + getStr(trigger.group(2)) + getDex(trigger.group(2))
+			chaTot = getMaxHP(getID(trigger.nick)) + getAtt(getID(trigger.nick)) + getDef(getID(trigger.nick)) + getStr(getID(trigger.nick)) + getDex(getID(trigger.nick))
+			defTot = getMaxHP(getID(trigger.group(2))) + getAtt(getID(trigger.group(2))) + getDef(getID(trigger.group(2))) + getStr(getID(trigger.group(2))) + getDex(getID(trigger.group(2)))
 			if chaTot > defTot:
 				favour = trigger.nick
 			else:
@@ -520,7 +522,7 @@ def attackDuel(bot, trigger):
 				rolls = "To hit: "
 				hits = 0
 				# this loop rolls a number of dice equal to the attacker's Att stat
-				for x in range (0,getAtt(trigger.nick)):
+				for x in range (0,getAtt(getID(trigger.nick))):
 					# rolls a hitDie-sided die, specified above
 					tRoll = random.randint(1,hitDie)
 					rolls = rolls + str(tRoll) + ', '
@@ -541,7 +543,7 @@ def attackDuel(bot, trigger):
 				# determine Strength hits
 				spRolls = "Strength roll: "
 				spHits = 0
-				for x in range (0,getStr(trigger.nick)):
+				for x in range (0,getStr(getID(trigger.nick))):
 					# rolls a strDie-sided die, specified above
 					tRoll = random.randint(1,strDie)
 					spRolls = spRolls + str(tRoll) + ', '
@@ -594,19 +596,19 @@ def attackDuel(bot, trigger):
 				bot.reply('\00313%s -- a grand total of *%s damage*!' % (rolls,hits))
 				# aw, zero damage!
 				if hits < 1:
-					if getStatus(opponent)=='stunned':
+					if getStatus(getID(opponent))=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 						cur.execute('UPDATE players SET status=\'healthy\' WHERE name=\'%s\'' % opponent)
 						bot.reply('\00313Shame! As %s\'s stun wears off, you have another chance to .attack!' % opponent)
-					elif getStatus(opponent)=='healthy':
+					elif getStatus(getID(opponent))=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
 						bot.reply('\00313Too bad! The turn passes to *%s* for the next round!' % opponent)
 					else:
 						bot.reply('\00313Something is wrong with the Status column! :o')
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
-				elif getCurHP(opponent) < (hits + 1):
+				elif getCurHP(getID(opponent)) < (hits + 1):
 					# set winner to the player, set active duel to false
-					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (trigger.nick,getCurrentDuel(trigger.nick))) 
+					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
@@ -616,15 +618,15 @@ def attackDuel(bot, trigger):
 					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
 				# otherwise, just deal the damage
 				else:
-					if getStatus(opponent)=='stunned':
+					if getStatus(getID(opponent))=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 						cur.execute('UPDATE players SET status=\'healthy\',curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (opponent,getCurHP(getID(opponent)),getMaxHP(getID(opponent))))
 						bot.reply('\00313It is your chance to .attack again while %s is recovering!' % opponent)
-					elif getStatus(opponent)=='healthy':
+					elif getStatus(getID(opponent))=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,dice=0,stage=1 WHERE duelid=%s' % (opponent,getCurrentDuel(trigger.nick)))
 						cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (opponent,getCurHP(getID(opponent)),getMaxHP(getID(opponent))))
 					else:
 						bot.reply('\00313Something is wrong with the Status column! :o')
 			elif duelResults[8]==4:
@@ -655,7 +657,7 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 					bot.reply('\00313Unsuccessful riposte, but it\'s now your turn to .attack!')
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
-				elif getCurHP(opponent) < (hits + 1):
+				elif getCurHP(getID(opponent)) < (hits + 1):
 					# set winner to the player, set active duel to false
 					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (trigger.nick,getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
@@ -669,7 +671,7 @@ def attackDuel(bot, trigger):
 				else:
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 					cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-					bot.say('\00313%s: You have %s/%s HP remaining!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+					bot.say('\00313%s: You have %s/%s HP remaining!' % (opponent,getCurHP(getID(opponent)),getMaxHP(getID(opponent))))
 					bot.reply('\00313Successful riposte! It is your turn to .attack!')
 
 			else:
@@ -706,7 +708,7 @@ def defendDuel(bot, trigger):
 			else:
 				opponent = duelResults[0]
 			# this loop rolls dice equal to the player's defense stat
-			for x in range (0,getDef(trigger.nick)):
+			for x in range (0,getDef(getID(trigger.nick))):
 				# rolls a defDie-sided die, specified above
 				tRoll = random.randint(1,defDie)
 				rolls = rolls + str(tRoll) + ', '
@@ -726,7 +728,7 @@ def defendDuel(bot, trigger):
 			# time for some dex rolls!
 			spRolls = "Dexterity roll: "
 			spHits = 0
-			for x in range (0,getDex(trigger.nick)):
+			for x in range (0,getDex(getID(trigger.nick))):
 				tRoll = random.randint(1,dexDie)
 				spRolls = spRolls + str(tRoll) + ', '
 				# do i really need to say it?
