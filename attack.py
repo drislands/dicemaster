@@ -761,35 +761,35 @@ def defendDuel(bot, trigger):
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % opponent)
-					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % opponent)
+					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName((opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack with %s damage dice!' % (opponent,newDice))
+					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack with %s damage dice!' % (getName(opponent),newDice))
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % trigger.nick)
-					bot.reply('\00313Your armour blocks some of the attack, but %s\'s blow winds you!' % opponent)
-					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (opponent,newDice))
+					bot.reply('\00313Your armour blocks some of the attack, but %s\'s blow winds you!' % getName(opponent))
+					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (getName(opponent),newDice))
 			elif isRiposte:
 				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
-					bot.reply('\00313You are able to swiftly and deftly parry %s\'s attack away! You can now .attack with a riposte!' % opponent)
+					bot.reply('\00313You are able to swiftly and deftly parry %s\'s attack away! You can now .attack with a riposte!' % getName(opponent))
 				else:
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
-					bot.reply('\00313%s\'s attack nearly strikes you, but you parry them away at the last second, catching them off guard! You can now .attack with a riposte!' % opponent)
+					bot.reply('\00313%s\'s attack nearly strikes you, but you parry them away at the last second, catching them off guard! You can now .attack with a riposte!' % getName(opponent))
 			else:
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Too bad! The turn passes to *%s* for damage, with %s dice at their disposal!' % (opponent,duelResults[9]))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-					bot.reply('\00313Your armour holds, no damage for %s! It is your turn to .attack!' % opponent)
+					bot.reply('\00313Your armour holds, no damage for %s! It is your turn to .attack!' % getName(opponent))
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s WHERE %s', (opponent,newDice,getCurrentDuel(trigger.nick)))
-					bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
+					bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (getName(opponent),newDice))
 			db.commit()
 
 	#		newDice = duelResults[9] - hits
