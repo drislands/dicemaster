@@ -340,7 +340,7 @@ def getPlayers(bot, trigger):
 	else:
 		bot.reply('List of players:')
 		for x in results:
-			bot.reply('%s', (x,))
+			bot.reply('%s' % x)
 
 # Reroll your stats
 @module.commands('reroll')
@@ -820,23 +820,6 @@ def defendDuel(bot, trigger):
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (getName(opponent),newDice))
 			db.commit()
-
-	#		newDice = duelResults[9] - hits
-	#		# aw, zero defense!
-	#		if hits < 1:
-	#			cur.execute('UPDATE duels SET turn=\'%s\',stage=3 WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (opponent,trigger.nick,trigger.nick))
-	#			bot.reply('\00313Too bad! The turn passes to *%s* for damage!' % opponent)
-	#		elif newDice < 0:
-	#			newDice = 0 - newDice
-	#			cur.execute('UPDATE duels SET stage=4,dice=%s WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (newDice,trigger.nick,trigger.nick))
-	#			bot.reply('\00313A chance for a riposte! You have _%s_ dice to use for your counter-.attack!!' % newDice)
-	#		elif newDice < 1:
-	#			cur.execute('UPDATE duels SET stage=1,dice=0 WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (trigger.nick,trigger.nick))
-	#			bot.reply('\00313A perfect parry! It is your turn to .attack!')
-	#		else:
-	#			cur.execute('UPDATE duels SET turn=\'%s\',stage=3,dice=%s WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (opponent,newDice,trigger.nick,trigger.nick))
-	#			bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
-	#		db.commit()
 
 # The forfeit command!
 @module.commands('forfeit')
