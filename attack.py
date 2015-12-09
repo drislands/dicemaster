@@ -314,7 +314,6 @@ def getStats(bot, trigger):
 			else:
 				bot.reply('\00313They are not currently in, or waiting on, a duel.')
 
-
 # Quick stats
 @module.commands('qstats')
 def getQuickStats(bot, trigger):
@@ -329,6 +328,19 @@ def getQuickStats(bot, trigger):
 		bot.reply('\00313Str: %s' % results[5])
 		bot.reply('\00313Dex: %s' % results[6])
 		bot.reply('\00313HP: %s/%s' % (results[8],results[7]))
+
+# List of Players
+@module.commands('players')
+def getPlayers(bot, trigger):
+	testDB(db,cur)
+	cur.execute('SELECT name FROM players')
+	results = cur.fetchall()
+	if not results:
+		bot.reply('There are no players at this time.')
+	else:
+		bot.reply('List of players:')
+		for x in results:
+			bot.reply('%s', (x,))
 
 # Reroll your stats
 @module.commands('reroll')
@@ -614,7 +626,7 @@ def attackDuel(bot, trigger):
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (getName(opponent),loseRerolls,rollBoostRate))
-					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
+					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),trigger.nick))
 				# otherwise, just deal the damage
 				else:
 					if getStatus(opponent)=='stunned':
@@ -740,20 +752,20 @@ def defendDuel(bot, trigger):
 				if tRoll > (dexThr - 1):
 					if dubDex and tRoll > (duDxTh - 1):
 						spHits = spHits + 2
-					#	if DEBUG:
-					#		bot.say('%s: dub hit!' % tRoll)
+						if DEBUG:
+							bot.say('%d: dub hit!' % tRoll)
 					else:
-						spHits = spHits = 1
-					#	if DEBUG:
-					#		bot.say('%s: hit!' % tRoll)
+						spHits = spHits + 1
+						if DEBUG:
+							bot.say('%d: hit!' % tRoll)
 				elif negDex and tRoll < (neDxTh + 1):
 					spHits = spHits - 1
-				#	if DEBUG:
-				#		bot.say('%s: negative hit!' % tRoll)
-			#	elif DEBUG:
-			#		bot.say('%s: no hit!' % tRoll)
-			#	if DEBUG:
-			#		bot.say('%s total so far!' % spHits)
+					if DEBUG:
+						bot.say('%d: negative hit!' % tRoll)
+				elif DEBUG:
+					bot.say('%d: no hit!' % tRoll)
+				if DEBUG:
+					bot.say('%d total so far!' % spHits)
 			spRolls = spRolls + '!'
 			spRolls = re.sub(', !', '', spRolls)
 			bot.reply('%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
@@ -781,7 +793,7 @@ def defendDuel(bot, trigger):
 					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName(opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack with %s damage dice!' % (getName(opponent),newDice))
+					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack!' % (getName(opponent),newDice))
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % trigger.nick)
