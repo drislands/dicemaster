@@ -14,7 +14,7 @@ import string
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = True
 # whether or not to show debug logs
-DEBUG = True
+DEBUG = False
 
 # connect to the data base, and create a cursor with which to execute queries
 db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
@@ -562,7 +562,7 @@ def attackDuel(bot, trigger):
 				# aw, zero hits!
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('\00313Too bad! The turn passes to %s for the next round!' % opponent)
+					bot.reply('\00313Too bad! The turn passes to %s for the next round!' % getName(opponent))
 				# sets the dice column to the number of hits, to be used with the next .defend command, and changes the turn and the stage
 				else:
 					cur.execute('UPDATE duels SET turn=%s,dice=%s,specialdice=%s,stage=2 WHERE duelid=%s', (opponent,hits,spHits,getCurrentDuel(trigger.nick)))
@@ -598,10 +598,10 @@ def attackDuel(bot, trigger):
 					if getStatus(opponent)=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 						cur.execute('UPDATE players SET status=\'healthy\' WHERE id=%s' % opponent)
-						bot.reply('\00313Shame! As %s\'s stun wears off, you have another chance to .attack!' % opponent)
+						bot.reply('\00313Shame! As %s\'s stun wears off, you have another chance to .attack!' % getName(opponent))
 					elif getStatus(opponent)=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-						bot.reply('\00313Too bad! The turn passes to *%s* for the next round!' % opponent)
+						bot.reply('\00313Too bad! The turn passes to *%s* for the next round!' % getName(opponent))
 					else:
 						bot.reply('\00313Something is wrong with the Status column! :o')
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
@@ -610,7 +610,7 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
-					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
+					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (getName(opponent),loseRerolls,rollBoostRate))
@@ -730,6 +730,9 @@ def defendDuel(bot, trigger):
 			# time for some dex rolls!
 			spRolls = "Dexterity roll: "
 			spHits = 0
+			if DEBUG:
+				bot.reply('These are the stats we are working with:')
+				bot.reply('%s is dex of player, %s is dexDie, %s is DexThr, %s is dubDex, %s is duDxTh, %s is negDex, and %s is neDxTh' % (getDex(getID(trigger.nick)),dexDie,dexThr,dubDex,duDxTh,negDex,neDxTh))
 			for x in range (0,getDex(getID(trigger.nick))):
 				tRoll = random.randint(1,dexDie)
 				spRolls = spRolls + str(tRoll) + ', '
@@ -737,33 +740,33 @@ def defendDuel(bot, trigger):
 				if tRoll > (dexThr - 1):
 					if dubDex and tRoll > (duDxTh - 1):
 						spHits = spHits + 2
-						if DEBUG:
-							bot.say('\0033%s: dub hit!' % tRoll)
+					#	if DEBUG:
+					#		bot.say('%s: dub hit!' % tRoll)
 					else:
 						spHits = spHits = 1
-						if DEBUG:
-							bot.say('\0033%s: hit!' % tRoll)
+					#	if DEBUG:
+					#		bot.say('%s: hit!' % tRoll)
 				elif negDex and tRoll < (neDxTh + 1):
 					spHits = spHits - 1
-					if DEBUG:
-						bot.say('\0033%s: negative hit!' % tRoll)
-				elif DEBUG:
-					bot.say('\0033%s: no hit!' % tRoll)
-				if DEBUG:
-					bot.say('\0033%s total so far!' % spHits)
+				#	if DEBUG:
+				#		bot.say('%s: negative hit!' % tRoll)
+			#	elif DEBUG:
+			#		bot.say('%s: no hit!' % tRoll)
+			#	if DEBUG:
+			#		bot.say('%s total so far!' % spHits)
 			spRolls = spRolls + '!'
 			spRolls = re.sub(', !', '', spRolls)
-			bot.reply('\0033%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
+			bot.reply('%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
 			if showHiddenRolls:
 				bot.reply(spRolls)
-				bot.reply('\0033You got a Dex roll of %s. Shhh....' % spHits)
+				bot.reply('You got a Dex roll of %s. Shhh....' % spHits)
 			## duelResults[9] is the Hit roll from last time, and [10] is the Str roll
 			isStun = False
 			isRiposte = False
 			if duelResults[10] > ((2 * hits) - 1) and spHits > ((2 * duelResults[9]) - 1):
-				if (duelResults[10] + duelResults[9]) > (hits + spRolls):
+				if (duelResults[10] + duelResults[9]) > (hits + spHits):
 					isStun = True
-				elif (duelResults[10] + duelResults[9]) < (hits + spRolls):
+				elif (duelResults[10] + duelResults[9]) < (hits + spHits):
 					isRiposte = True
 			elif duelResults[10] > ((2 * hits) - 1):
 				isStun = True
@@ -841,10 +844,10 @@ def forfeitDuel(bot, trigger):
 				opponent = duelResults[0]
 			cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
 			# grant the winner their boost(s) and set HP to max
-			cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp WHERE id=%s' % (winBoosts,opponent))
+			cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=null WHERE id=%s' % (winBoosts,opponent))
 			bot.say('\00313%s: You are the winner of the duel against %s! You have gained %s stat point(s) for your victory!' % (getName(opponent),trigger.nick,winBoosts))
 			# grant the loser a reroll and set his HP to max
-			cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp WHERE name=\'%s\'' % (loseRerolls,trigger.nick))
+			cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=null WHERE name=\'%s\'' % (loseRerolls,trigger.nick))
 			bot.reply('\00313Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (loseRerolls,rollBoostRate))
 			bot.say('\00313The duel between %s and %s has officially ended. The winner was %s! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),getName(opponent)))
 			db.commit()
