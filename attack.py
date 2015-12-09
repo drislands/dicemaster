@@ -21,11 +21,12 @@ db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="di
 cur = db.cursor()
 
 #function to make sure that the db is still connected
-def testDB(myDB,myCur):
+def testDB(bot,myDB,myCur):
 	try:
 		myCur.execute('SELECT * FROM players;')
 	except (AttributeError, MySQLdb.OperationalError):
 		myDB = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
+		bot.reply('Sorry, fell asleep! Now, where were we....')
 
 # set the correct profile
 cur.execute('SELECT currentP FROM currentprofile WHERE ph=1');
@@ -181,7 +182,7 @@ def getDex(ID):
 	return cur.fetchone()[0]
 def getID(name):
 	testDB(db,cur)
-	cur.execute('SELECT ID FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT ID FROM players WHERE name=%s', (name,))
 	return cur.fetchone()[0]
 def getName(ID):
 	testDB(db,cur)
@@ -201,7 +202,7 @@ def getActive(ID):
 	return cur.fetchone()[0]
 def doesExist(name):
 	testDB(db,cur)
-	cur.execute('SELECT * FROM players WHERE name=\'%s\'' % name)
+	cur.execute('SELECT * FROM players WHERE name=%s', (name,))
 	return cur.fetchone()
 def getBoosts(ID):
 	testDB(db,cur)
@@ -418,7 +419,7 @@ def challengePlayer(bot, trigger):
 		bot.reply('\00313There is no player called %s, I\'m afraid. Tell them to \'.createplayer\'!' % trigger.group(2))
 	else:
 		# check to see if there are any active duels with the player
-		cur.execute('SELECT * FROM players WHERE name=\'%s\' AND currentduel IS NOT NULL' % trigger.nick)
+		cur.execute('SELECT * FROM players WHERE name=%s AND currentduel IS NOT NULL', (trigger.nick,))
 		activeDuel = cur.fetchone()
 		# check to see if the player is already waiting for a response
 		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getID(trigger.nick))
@@ -427,7 +428,7 @@ def challengePlayer(bot, trigger):
 		cur.execute('SELECT * FROM duels WHERE Defender=%s AND accepted=false;' % getID(trigger.nick))
 		youWaiting = cur.fetchone()
 		# check to see if the challenged has any active duels
-		cur.execute('SELECT * FROM players WHERE name=\'%s\' AND currentduel IS NOT NULL' % trigger.group(2))
+		cur.execute('SELECT * FROM players WHERE name=%s AND currentduel IS NOT NULL', (trigger.group(2),))
 		themActive = cur.fetchone()
 		# check to see if the challenged is waiting on a response
 		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getID(trigger.group(2)))
@@ -443,11 +444,11 @@ def challengePlayer(bot, trigger):
 		elif youWaiting:
 			bot.reply('\00313There is already a challenge from %s waiting on your response!' % youWaiting[0])
 		elif themActive:
-			bot.reply('\00313%s is already in a duel. Wait for them to finish!' % trigger.group(2))
+			bot.reply('\00313%s is already in a duel. Wait for them to finish!', (trigger.group(2),))
 		elif themChallenging:
-			bot.reply('\00313%s has challenged %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themChallenging[1]))
+			bot.reply('\00313%s has challenged %s for a duel and cannot accept duels at this time.', ((trigger.group(2),themChallenging[1])))
 		elif themWaiting:
-			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themWaiting[0]))
+			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.', ((trigger.group(2),themWaiting[0])))
 		else:
 			# creates the duel data 
 			chaTot = getMaxHP(getID(trigger.nick)) + getAtt(getID(trigger.nick)) + getDef(getID(trigger.nick)) + getStr(getID(trigger.nick)) + getDex(getID(trigger.nick))
