@@ -793,7 +793,7 @@ def defendDuel(bot, trigger):
 					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName(opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack!' % (getName(opponent),newDice))
+					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack!' % getName(opponent))
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % trigger.nick)
