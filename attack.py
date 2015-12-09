@@ -780,9 +780,9 @@ def defendDuel(bot, trigger):
 					isStun = True
 				elif (duelResults[10] + duelResults[9]) < (hits + spHits):
 					isRiposte = True
-			elif duelResults[10] > ((2 * hits) - 1):
+			elif duelResults[10] > ((2 * hits) - 1) and duelResults[10] > 0:
 				isStun = True
-			elif spHits > ((2 * duelResults[9]) - 1):
+			elif spHits > ((2 * duelResults[9]) - 1) and spHits > 0:
 				isRiposte = True
 			# react according to the situation, ie stun, riposte, neither
 			newDice = duelResults[9] - hits
