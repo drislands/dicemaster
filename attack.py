@@ -237,7 +237,7 @@ def getStatus(name):
 def createPlayer(bot, trigger):
 	testDB(db,cur)
 	if doesExist(trigger.nick):
-		bot.reply('Your player already exists!')
+		bot.reply('\00313Your player already exists!')
 	else:
 		# generate stats based on variables set above
 		att = random.randint(minAtt,maxAtt)
@@ -247,7 +247,7 @@ def createPlayer(bot, trigger):
 		dex = random.randint(minDex,maxDex)
 		# ID (auto generated), Active, Name, Attack, Defense, MaxHP, Current HP, boosts, used boosts, rerolls, used rerolls
 		cur.execute('INSERT INTO players VALUES(NULL,0,\'%s\',%s,%s,%s,%s,%s,%s,0,0,0,0,NULL,\'healthy\')' % (trigger.nick,att,defense,strength,dex,hp,hp))
-		bot.reply('Your character is created! Your max hp is %s, you have %s attack dice and %s defense dice, you have %s strength dice and %s dexterity dice, and you are listed as player %s. Game on!' % (hp,att,defense,strength,dex,getID(trigger.nick)))
+		bot.reply('\00313Your character is created! Your max hp is %s, you have %s attack dice and %s defense dice, you have %s strength dice and %s dexterity dice, and you are listed as player %s. Game on!' % (hp,att,defense,strength,dex,getID(trigger.nick)))
 		db.commit()
 
 # Check Stats
@@ -256,40 +256,40 @@ def getStats(bot, trigger):
 	testDB(db,cur)
 	if not trigger.group(2):
 		if not doesExist(trigger.nick):
-			bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+			bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 		else:
 			cur.execute('SELECT * FROM players WHERE name=\'%s\'' % trigger.nick)
 			results = cur.fetchone()
-			bot.reply('Your Attack is %s, Defense is %s, Strength is %s, Dexterity is %s, and you have %s/%sHP.' % (results[3],results[4],results[5],results[6],results[8],results[7]))
-			bot.reply('You have used %s Boost points and have %s remaining Boost points to spend.' % (results[10],results[9]))
-			bot.reply('You have used %s stat Rerolls and have %s remaining stat Rerolls.' % (results[12],results[11]))
+			bot.reply('\00313Your Attack is %s, Defense is %s, Strength is %s, Dexterity is %s, and you have %s/%sHP.' % (results[3],results[4],results[5],results[6],results[8],results[7]))
+			bot.reply('\00313You have used %s Boost points and have %s remaining Boost points to spend.' % (results[10],results[9]))
+			bot.reply('\00313You have used %s stat Rerolls and have %s remaining stat Rerolls.' % (results[12],results[11]))
 			cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			results = cur.fetchone()
 			if results:
 				if results[0]==getID(trigger.nick):
 					opponent = results[1]
 					if results[2]:
-						bot.reply('You are currently in a duel with %s.' % opponent)
+						bot.reply('\00313You are currently in a duel with %s.' % opponent)
 					else:
-						bot.reply('You currently are awaiting %s for a response to your challenge.' % opponent)
+						bot.reply('\00313You currently are awaiting %s for a response to your challenge.' % opponent)
 				else:
 					opponent = results[0]
 					if results[2]:
-						bot.reply('You are currently in a duel with %s.' % opponent)
+						bot.reply('\00313You are currently in a duel with %s.' % opponent)
 					else:
-						bot.reply('%s is currently awaiting your acceptance of their challenge.' % opponent)
+						bot.reply('\00313%s is currently awaiting your acceptance of their challenge.' % opponent)
 			else:
-				bot.reply('You are not currently in, or waiting on, a duel.')
+				bot.reply('\00313You are not currently in, or waiting on, a duel.')
 	else:
 		if not doesExist(trigger.group(2)):
-			bot.reply('Sorry, %s isn\'t an existing player.' % trigger.group(2))
+			bot.reply('\00313Sorry, %s isn\'t an existing player.' % trigger.group(2))
 		else:
 			cur.execute('SELECT * FROM players WHERE name=\'%s\'' % trigger.group(2))
 			results = cur.fetchone()
-			bot.reply('The stats for the player %s are as follows:' % trigger.group(2))
-			bot.reply('Attack is %s, Defense is %s, Strength is %s, Dexterity is %s, and %s/%sHP.' % (results[3],results[4],results[5],results[6],results[8],results[7]))
-			bot.reply('They have used %s Boost points and have %s remaining Boost points to spend.' % (results[10],results[9]))
-			bot.reply('They have used %s stat Rerolls and have %s remaining stat Rerolls.' % (results[12],results[11]))
+			bot.reply('\00313The stats for the player %s are as follows:' % trigger.group(2))
+			bot.reply('\00313Attack is %s, Defense is %s, Strength is %s, Dexterity is %s, and %s/%sHP.' % (results[3],results[4],results[5],results[6],results[8],results[7]))
+			bot.reply('\00313They have used %s Boost points and have %s remaining Boost points to spend.' % (results[10],results[9]))
+			bot.reply('\00313They have used %s stat Rerolls and have %s remaining stat Rerolls.' % (results[12],results[11]))
 			cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.group(2)),))
 			results = cur.fetchone()
 			if results:
@@ -298,22 +298,22 @@ def getStats(bot, trigger):
 					if opponent==getID(trigger.nick):
 						opponent = 'you'
 					if results[2]:
-						bot.reply('They are currently in a duel with %s.' % opponent)
+						bot.reply('\00313They are currently in a duel with %s.' % opponent)
 					else:
-						bot.reply('They currently are awaiting %s for a response to their challenge.' % opponent)
+						bot.reply('\00313They currently are awaiting %s for a response to their challenge.' % opponent)
 				else:
 					opponent = results[0]
 					if opponent==getID(trigger.nick):
 						opponent = 'you'
 					if results[2]:
-						bot.reply('They are currently in a duel with %s.' % opponent)
+						bot.reply('\00313They are currently in a duel with %s.' % opponent)
 					else:
 						if opponent=='you':
-							bot.reply('You are currently awaiting their acceptance of your challenge.')
+							bot.reply('\00313You are currently awaiting their acceptance of your challenge.')
 						else:
-							bot.reply('%s is currently awaiting their acceptance of their challenge.' % opponent)
+							bot.reply('\00313%s is currently awaiting their acceptance of their challenge.' % opponent)
 			else:
-				bot.reply('They are not currently in, or waiting on, a duel.')
+				bot.reply('\00313They are not currently in, or waiting on, a duel.')
 
 
 # Quick stats
@@ -321,24 +321,24 @@ def getStats(bot, trigger):
 def getQuickStats(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		cur.execute('SELECT * FROM players WHERE name=\'%s\'' % trigger.nick)
 		results = cur.fetchone()
-		bot.reply('Att: %s' % results[3])
-		bot.reply('Def: %s' % results[4])
-		bot.reply('Str: %s' % results[5])
-		bot.reply('Dex: %s' % results[6])
-		bot.reply('HP: %s/%s' % (results[8],results[7]))
+		bot.reply('\00313Att: %s' % results[3])
+		bot.reply('\00313Def: %s' % results[4])
+		bot.reply('\00313Str: %s' % results[5])
+		bot.reply('\00313Dex: %s' % results[6])
+		bot.reply('\00313HP: %s/%s' % (results[8],results[7]))
 
 # Reroll your stats
 @module.commands('reroll')
 def rerollStats(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getRerolls(trigger.nick) < 1:
-		bot.reply('You don\'t have any stat rerolls remaining!')
+		bot.reply('\00313You don\'t have any stat rerolls remaining!')
 	else:
 		# generate new stats based on variables set above
 		att = random.randint(minAtt,maxAtt)
@@ -348,8 +348,8 @@ def rerollStats(bot, trigger):
 		dex = random.randint(minDex,maxDex)
 		# remove one reroll and increment the UsedRerolls stat
 		cur.execute('UPDATE players SET attack=%s,defense=%s,strength=%s,dexterity=%s,maxhp=%s,curhp=%s,rerolls=rerolls-1,used_rerolls=used_rerolls+1 WHERE name=\'%s\'' % (att,defense,strength,dex,hp,hp,trigger.nick))
-		bot.reply('You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(trigger.nick),getUsedRerolls(trigger.nick)))
-		bot.reply('Your new stats are: Attack - %s, Defense - %s, Strength - %s, Dexterity - %s, Max HP - %s. Game on!' % (att,defense,strength,dex,hp))
+		bot.reply('\00313You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(trigger.nick),getUsedRerolls(trigger.nick)))
+		bot.reply('\00313Your new stats are: Attack - %s, Defense - %s, Strength - %s, Dexterity - %s, Max HP - %s. Game on!' % (att,defense,strength,dex,hp))
 		db.commit()
 
 # Boost a stat
@@ -358,43 +358,43 @@ def boostStat(bot, trigger):
 	testDB(db,cur)
 	stat = trigger.group(2)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getBoosts(trigger.nick) < 1:
-		bot.reply('You don\'t have any stat boosts remaining!')
+		bot.reply('\00313You don\'t have any stat boosts remaining!')
 	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity'):
 		if stat=='attack':
 			cur.execute('UPDATE players SET attack=attack+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(trigger.nick)))
+			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(trigger.nick)))
 		elif stat=='defense':
 			cur.execute('UPDATE players SET defense=defense+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(trigger.nick)))
+			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(trigger.nick)))
 		elif stat=='strength':
 			cur.execute('UPDATE players SET strength=strength+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(trigger.nick)))
+			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(trigger.nick)))
 		elif stat=='dexterity':
 			cur.execute('UPDATE players SET dexterity=dexterity+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(trigger.nick)))
+			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(trigger.nick)))
 		else:
 			cur.execute('UPDATE players SET maxhp=maxhp+%s,curhp=curhp+%s WHERE name=\'%s\'' % trigger.nick)
-			bot.reply('Your Max HP has been increased by %s, for a total of %s.' % (boostVal,getMaxHP(trigger.nick)))
+			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal,getMaxHP(trigger.nick)))
 		cur.execute('UPDATE players SET boosts=boosts-1,used_boosts=used_boosts+1 WHERE name=\'%s\'' % trigger.nick)
-		bot.reply('You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(trigger.nick),getUsedBoosts(trigger.nick)))
+		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(trigger.nick),getUsedBoosts(trigger.nick)))
 		db.commit()
 	else:
-		bot.reply('Sorry, \'%s\' isn\'t a stat I know of. Try again?' % stat)
+		bot.reply('\00313Sorry, \'%s\' isn\'t a stat I know of. Try again?' % stat)
 
 # Trade a reroll for a number of stat points
 @module.commands('trade')
 def tradeReroll(bot, trigger): 
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getRerolls(trigger.nick) < 1:
-		bot.reply('You don\'t have any rerolls to trade!')
+		bot.reply('\00313You don\'t have any rerolls to trade!')
 	else:
 		cur.execute('UPDATE players SET rerolls=rerolls-1,boosts=boosts+%s WHERE name=\'%s\'' % (rollBoostRate,trigger.nick))
-		bot.reply('You now have one fewer reroll, a total of %s remaining.' % getRerolls(trigger.nick))
-		bot.reply('You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(trigger.nick)))
+		bot.reply('\00313You now have one fewer reroll, a total of %s remaining.' % getRerolls(trigger.nick))
+		bot.reply('\00313You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(trigger.nick)))
 		db.commit()
 
 # Challenges another player to a duel
@@ -402,9 +402,9 @@ def tradeReroll(bot, trigger):
 def challengePlayer(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif not doesExist(trigger.group(2)):
-		bot.reply('There is no player called %s, I\'m afraid. Tell them to \'.createplayer\'!' % trigger.group(2))
+		bot.reply('\00313There is no player called %s, I\'m afraid. Tell them to \'.createplayer\'!' % trigger.group(2))
 	else:
 		# check to see if there are any active duels with the player
 		cur.execute('SELECT * FROM players WHERE name=\'%s\' AND currentduel IS NOT NULL' % trigger.nick)
@@ -426,17 +426,17 @@ def challengePlayer(bot, trigger):
 		themWaiting = cur.fetchone()
 		##
 		if activeDuel:
-			bot.reply('You already have an open duel! Finish that first before stating another!')
+			bot.reply('\00313You already have an open duel! Finish that first before stating another!')
 		elif youChallenging:
-			bot.reply('You already have an open challenge waiting on %s\'s response!' % youChallenging[1])
+			bot.reply('\00313You already have an open challenge waiting on %s\'s response!' % youChallenging[1])
 		elif youWaiting:
-			bot.reply('There is already a challenge from %s waiting on your response!' % youWaiting[0])
+			bot.reply('\00313There is already a challenge from %s waiting on your response!' % youWaiting[0])
 		elif themActive:
-			bot.reply('%s is already in a duel. Wait for them to finish!' % trigger.group(2))
+			bot.reply('\00313%s is already in a duel. Wait for them to finish!' % trigger.group(2))
 		elif themChallenging:
-			bot.reply('%s has challenged %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themChallenging[1]))
+			bot.reply('\00313%s has challenged %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themChallenging[1]))
 		elif themWaiting:
-			bot.reply('%s has been challenged by %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themWaiting[0]))
+			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.' % (trigger.group(2),themWaiting[0]))
 		else:
 			# creates the duel data 
 			chaTot = getMaxHP(trigger.nick) + getAtt(trigger.nick) + getDef(trigger.nick) + getStr(trigger.nick) + getDex(trigger.nick)
@@ -448,7 +448,7 @@ def challengePlayer(bot, trigger):
 			duelID = os.urandom(16)
 			cur.execute('INSERT INTO duels VALUES(%s,%s,false,%s,NULL,false,%s,%s,1,0,0);', (getID(trigger.nick), getID(trigger.group(2)),getID(favour),getID(trigger.group(2)),duelID))
 			cur.execute('UPDATE players SET currentduel=%s WHERE id=%s OR id=%s', (duelID,getID(trigger.nick),getID(trigger.group(2))))
-			bot.say('%s: You are officially challenged to a duel by %s! Say \'.accept\' to begin the battle!' % (trigger.group(2),trigger.nick))
+			bot.say('\00313%s: You are officially challenged to a duel by %s! Say \'.accept\' to begin the battle!' % (trigger.group(2),trigger.nick))
 			db.commit()
 
 # Accepts a duel from another player
@@ -456,17 +456,17 @@ def challengePlayer(bot, trigger):
 def acceptChallenge(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 		waiting = cur.fetchone()
 		if not waiting:
-			bot.reply('You don\'t have any waiting challenges, I\'m afraid. Issue one with \'.challenge <name>\'!')
+			bot.reply('\00313You don\'t have any waiting challenges, I\'m afraid. Issue one with \'.challenge <name>\'!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('UPDATE duels SET accepted=true, active=true WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-			bot.say('%s: %s has accepted your challenge!' % (getName(waiting[0]),trigger.nick))
-			bot.say('The duel between %s and %s is now beginning, with the defender, %s, having the first move!' % (trigger.nick,getName(waiting[0]),trigger.nick))
+			bot.say('\00313%s: %s has accepted your challenge!' % (getName(waiting[0]),trigger.nick))
+			bot.say('\00313The duel between %s and %s is now beginning, with the defender, %s, having the first move!' % (trigger.nick,getName(waiting[0]),trigger.nick))
 			db.commit()
 
 # Rejects a duel from another player
@@ -474,17 +474,17 @@ def acceptChallenge(bot, trigger):
 def rejectChallenge(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 		waiting = cur.fetchone()
 		if not waiting:
-			bot.reply('You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
+			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			cur.execute('UPDATE players SET currentduel=NULL WHERE id=%s OR id=%s', (getID(trigger.nick),waiting[0]))
-			bot.say('%s: %s has rejected your duel! "%s", they said!' % (getName(waiting[0]),trigger.nick,trigger.group(2)))
+			bot.say('\00313%s: %s has rejected your duel! "%s", they said!' % (getName(waiting[0]),trigger.nick,trigger.group(2)))
 			db.commit()
 
 # Attacks a player
@@ -492,7 +492,7 @@ def rejectChallenge(bot, trigger):
 def attackDuel(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		# determine if the player is actually in a duel or not
 		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getID(trigger.nick),getID(trigger.nick)))
@@ -501,14 +501,14 @@ def attackDuel(bot, trigger):
 			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getID(trigger.nick))
 			cha = cur.fetchone()
 			if(cha):
-				bot.reply('You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
+				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
 			else:
-				bot.reply('You are not currently in a duel! Go .challenge someone!')
+				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
 		elif not (duelResults[6]==getID(trigger.nick)):
-			bot.reply('Wait your turn, it\'s %s\'s turn!' % duelResults[6])
+			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % duelResults[6])
 		elif duelResults[8]==2:
-			bot.reply('It\'s your turn to .defend, not attack!')
+			bot.reply('\00313It\'s your turn to .defend, not attack!')
 		else:
 			# set the opponent
 			if duelResults[0]==getID(trigger.nick):
@@ -537,7 +537,7 @@ def attackDuel(bot, trigger):
 						hits = hits - 1
 				rolls = rolls + '!'              # these two lines are to 
 				rolls = re.sub(', !', '', rolls) #  remove the last comma
-				bot.reply('%s -- a grand total of %s hit(s)!' % (rolls,hits))
+				bot.reply('\00313%s -- a grand total of %s hit(s)!' % (rolls,hits))
 				# determine Strength hits
 				spRolls = "Strength roll: "
 				spHits = 0
@@ -561,14 +561,14 @@ def attackDuel(bot, trigger):
 				# aw, zero hits!
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('Too bad! The turn passes to %s for the next round!' % opponent)
+					bot.reply('\00313Too bad! The turn passes to %s for the next round!' % opponent)
 				# sets the dice column to the number of hits, to be used with the next .defend command, and changes the turn and the stage
 				else:
 					cur.execute('UPDATE duels SET turn=%s,dice=%s,specialdice=%s,stage=2 WHERE duelid=%s', (opponent,hits,spHits,getCurrentDuel(trigger.nick)))
-					bot.say('%s: it is your turn to .defend!' % opponent) # the hits for Attack and for Strength are stored in the duel data
+					bot.say('\00313%s: it is your turn to .defend!' % opponent) # the hits for Attack and for Strength are stored in the duel data
 				if showHiddenRolls:
 					bot.reply(spRolls)
-					bot.reply('Grand total of %s for your strength roll. Shh.....', spHits)
+					bot.reply('\00313Grand total of %s for your strength roll. Shh.....', spHits)
 			# if it's time to determine your ultimate damage, following a .defend command
 			elif duelResults[8]==3:
 				rolls = "Damage roll: "
@@ -591,42 +591,42 @@ def attackDuel(bot, trigger):
 						hits = hits - 1
 				rolls = rolls + '!'
 				rolls = re.sub(', !', '', rolls)
-				bot.reply('%s -- a grand total of *%s damage*!' % (rolls,hits))
+				bot.reply('\00313%s -- a grand total of *%s damage*!' % (rolls,hits))
 				# aw, zero damage!
 				if hits < 1:
 					if getStatus(opponent)=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 						cur.execute('UPDATE players SET status=\'healthy\' WHERE name=\'%s\'' % opponent)
-						bot.reply('Shame! As %s\'s stun wears off, you have another chance to .attack!' % opponent)
+						bot.reply('\00313Shame! As %s\'s stun wears off, you have another chance to .attack!' % opponent)
 					elif getStatus(opponent)=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-						bot.reply('Too bad! The turn passes to *%s* for the next round!' % opponent)
+						bot.reply('\00313Too bad! The turn passes to *%s* for the next round!' % opponent)
 					else:
-						bot.reply('Something is wrong with the Status column! :o')
+						bot.reply('\00313Something is wrong with the Status column! :o')
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
 					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (trigger.nick,getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
-					bot.reply('You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
+					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (loseRerolls,opponent))
-					bot.say('%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (opponent,loseRerolls,rollBoostRate))
-					bot.say('The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
+					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (opponent,loseRerolls,rollBoostRate))
+					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
 				# otherwise, just deal the damage
 				else:
 					if getStatus(opponent)=='stunned':
 						cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 						cur.execute('UPDATE players SET status=\'healthy\',curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('%s: You have %s/%s HP remaining! Your stun wears off!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
-						bot.reply('It is your chance to .attack again while %s is recovering!' % opponent)
+						bot.say('\00313%s: You have %s/%s HP remaining! Your stun wears off!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+						bot.reply('\00313It is your chance to .attack again while %s is recovering!' % opponent)
 					elif getStatus(opponent)=='healthy':
 						cur.execute('UPDATE duels SET turn=%s,dice=0,stage=1 WHERE duelid=%s' % (opponent,getCurrentDuel(trigger.nick)))
 						cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-						bot.say('%s: You have %s/%s HP remaining! It is your turn to .attack!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+						bot.say('\00313%s: You have %s/%s HP remaining! It is your turn to .attack!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
 					else:
-						bot.reply('Something is wrong with the Status column! :o')
+						bot.reply('\00313Something is wrong with the Status column! :o')
 			elif duelResults[8]==4:
 				rolls = "Riposte roll: "
 				hits = 0
@@ -649,31 +649,31 @@ def attackDuel(bot, trigger):
 						hits = hits - 1
 				rolls = rolls + '!'
 				rolls = re.sub(', !', '', rolls)
-				bot.reply('%s -- a grand total of *%s riposte damage*!' % (rolls,hits))
+				bot.reply('\00313%s -- a grand total of *%s riposte damage*!' % (rolls,hits))
 				# aw, zero damage!
 				if hits < 1:
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-					bot.reply('Unsuccessful riposte, but it\'s now your turn to .attack!')
+					bot.reply('\00313Unsuccessful riposte, but it\'s now your turn to .attack!')
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
 					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s' % (trigger.nick,getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
-					bot.reply('You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
+					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (loseRerolls,opponent))
-					bot.say('%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (opponent,loseRerolls,rollBoostRate))
-					bot.say('The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
+					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (opponent,loseRerolls,rollBoostRate))
+					bot.say('\00313The duel between *%s* and *%s* has officially ended. The winner was *%s*! Both of them have been healed back to max. See you next time!' % (duelResults[0],duelResults[1],trigger.nick))
 				# otherwise, just deal the damage
 				else:
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 					cur.execute('UPDATE players SET curhp=curhp-%s WHERE name=\'%s\'' % (hits,opponent))
-					bot.say('%s: You have %s/%s HP remaining!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
-					bot.reply('Successful riposte! It is your turn to .attack!')
+					bot.say('\00313%s: You have %s/%s HP remaining!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+					bot.reply('\00313Successful riposte! It is your turn to .attack!')
 
 			else:
-				bot.reply('Not really sure how you got here....the Stage column must be messed up. Check it out!')
+				bot.reply('\00313Not really sure how you got here....the Stage column must be messed up. Check it out!')
 			db.commit()
 
 # The defend command!
@@ -681,7 +681,7 @@ def attackDuel(bot, trigger):
 def defendDuel(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		# determine if the player is actually in a duel or not
 		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getID(trigger.nick),getID(trigger.nick)))
@@ -690,14 +690,14 @@ def defendDuel(bot, trigger):
 			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getID(trigger.nick))
 			cha = cur.fetchone()
 			if(cha):
-				bot.reply('You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
+				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
 			else:
-				bot.reply('You are not currently in a duel! Go .challenge someone!')
+				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
 		elif not (duelResults[6]==getID(trigger.nick)):
-			bot.reply('Wait your turn, it\'s %s\'s turn!' % duelResults[6])
+			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % duelResults[6])
 		elif duelResults[8]==1 or duelResults[8]==3 or duelResults[8]==4:
-			bot.reply('It\'s your turn to .attack, not defend!')
+			bot.reply('\00313It\'s your turn to .attack, not defend!')
 		elif duelResults[8]==2:
 			rolls = "Defense roll: "
 			hits = 0
@@ -739,10 +739,10 @@ def defendDuel(bot, trigger):
 					spHits = spHits - 1
 			spRolls = spRolls + '!'
 			spRolls = re.sub(', !', '', spRolls)
-			bot.reply('%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
+			bot.reply('\00313%s -- a grand total of _%s hit(s)_!' % (rolls,hits))
 			if showHiddenRolls:
 				bot.reply(spRolls)
-				bot.reply('You got a Dex roll of %s. Shhh....' % spHits)
+				bot.reply('\00313You got a Dex roll of %s. Shhh....' % spHits)
 			## duelResults[9] is the Hit roll from last time, and [10] is the Str roll
 			isStun = False
 			isRiposte = False
@@ -761,52 +761,52 @@ def defendDuel(bot, trigger):
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % opponent)
-					bot.reply('Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % opponent)
+					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % opponent)
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack with %s damage dice!' % (opponent,newDice))
+					bot.reply('\00313Your armour holds, no damage for %s! Their strike winds you though, leaving you stunned! The turn passes back to them for a new .attack with %s damage dice!' % (opponent,newDice))
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE name=\'%s\'' % trigger.nick)
-					bot.reply('Your armour blocks some of the attack, but %s\'s blow winds you!' % opponent)
-					bot.say('%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (opponent,newDice))
+					bot.reply('\00313Your armour blocks some of the attack, but %s\'s blow winds you!' % opponent)
+					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (opponent,newDice))
 			elif isRiposte:
 				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
-					bot.reply('Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
+					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
-					bot.reply('You are able to swiftly and deftly parry %s\'s attack away! You can now .attack with a riposte!' % opponent)
+					bot.reply('\00313You are able to swiftly and deftly parry %s\'s attack away! You can now .attack with a riposte!' % opponent)
 				else:
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
-					bot.reply('%s\'s attack nearly strikes you, but you parry them away at the last second, catching them off guard! You can now .attack with a riposte!' % opponent)
+					bot.reply('\00313%s\'s attack nearly strikes you, but you parry them away at the last second, catching them off guard! You can now .attack with a riposte!' % opponent)
 			else:
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
-					bot.reply('Too bad! The turn passes to *%s* for damage, with %s dice at their disposal!' % (opponent,duelResults[9]))
+					bot.reply('\00313Too bad! The turn passes to *%s* for damage, with %s dice at their disposal!' % (opponent,duelResults[9]))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET stage=1,dice=0,specialdice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-					bot.reply('Your armour holds, no damage for %s! It is your turn to .attack!' % opponent)
+					bot.reply('\00313Your armour holds, no damage for %s! It is your turn to .attack!' % opponent)
 				else:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s WHERE %s', (opponent,newDice,getCurrentDuel(trigger.nick)))
-					bot.say('%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
+					bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
 			db.commit()
 
 	#		newDice = duelResults[9] - hits
 	#		# aw, zero defense!
 	#		if hits < 1:
 	#			cur.execute('UPDATE duels SET turn=\'%s\',stage=3 WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (opponent,trigger.nick,trigger.nick))
-	#			bot.reply('Too bad! The turn passes to *%s* for damage!' % opponent)
+	#			bot.reply('\00313Too bad! The turn passes to *%s* for damage!' % opponent)
 	#		elif newDice < 0:
 	#			newDice = 0 - newDice
 	#			cur.execute('UPDATE duels SET stage=4,dice=%s WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (newDice,trigger.nick,trigger.nick))
-	#			bot.reply('A chance for a riposte! You have _%s_ dice to use for your counter-.attack!!' % newDice)
+	#			bot.reply('\00313A chance for a riposte! You have _%s_ dice to use for your counter-.attack!!' % newDice)
 	#		elif newDice < 1:
 	#			cur.execute('UPDATE duels SET stage=1,dice=0 WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (trigger.nick,trigger.nick))
-	#			bot.reply('A perfect parry! It is your turn to .attack!')
+	#			bot.reply('\00313A perfect parry! It is your turn to .attack!')
 	#		else:
 	#			cur.execute('UPDATE duels SET turn=\'%s\',stage=3,dice=%s WHERE (challenger=\'%s\' OR defender=\'%s\') AND active=true' % (opponent,newDice,trigger.nick,trigger.nick))
-	#			bot.say('%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
+	#			bot.say('\00313%s: You have _%s_ dice remaining for damage. It is your turn to .attack!' % (opponent,newDice))
 	#		db.commit()
 
 # The forfeit command!
@@ -814,12 +814,12 @@ def defendDuel(bot, trigger):
 def forfeitDuel(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
-		bot.reply('Your player needs to exist first! Say \'.createplayer\' to get started.')
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		cur.execute('SELECT * FROM duels WHERE duelid=%s AND active=true', (getCurrentDuel(trigger.nick),))
 		duelResults = cur.fetchone()
 		if not duelResults:
-			bot.reply('You are not currently in a duel! Go .challenge someone before giving up!')
+			bot.reply('\00313You are not currently in a duel! Go .challenge someone before giving up!')
 		else:
 			if duelResults[0]==getID(trigger.nick):
 				opponent = duelResults[1]
@@ -828,14 +828,14 @@ def forfeitDuel(bot, trigger):
 			cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
 			# grant the winner their boost(s) and set HP to max
 			cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp WHERE id=%s' % (winBoosts,opponent))
-			bot.say('%s: You are the winner of the duel against %s! You have gained %s stat point(s) for your victory!' % (getName(opponent),trigger.nick,winBoosts))
+			bot.say('\00313%s: You are the winner of the duel against %s! You have gained %s stat point(s) for your victory!' % (getName(opponent),trigger.nick,winBoosts))
 			# grant the loser a reroll and set his HP to max
 			cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp WHERE name=\'%s\'' % (loseRerolls,trigger.nick))
-			bot.reply('Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (loseRerolls,rollBoostRate))
-			bot.say('The duel between %s and %s has officially ended. The winner was %s! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),getName(opponent)))
+			bot.reply('\00313Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (loseRerolls,rollBoostRate))
+			bot.say('\00313The duel between %s and %s has officially ended. The winner was %s! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),getName(opponent)))
 			db.commit()
 
 # override the help command
 @module.commands('help')
 def help(bot, trigger):
-	bot.reply('No help for you!')
+	bot.reply('\00313No help for you!')
