@@ -478,6 +478,8 @@ def acceptChallenge(bot, trigger):
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges, I\'m afraid. Issue one with \'.challenge <name>\'!')
+		elif waiting[5]==1:
+			bot.reply('\00313Your duel is already underway!')
 		elif waiting[0]==getID(trigger.nick):
 			bot.reply('\00313You can\'t accept your own invitation! You fool!')
 		else:
@@ -494,10 +496,12 @@ def rejectChallenge(bot, trigger):
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
-		cur.execute('SELECT * FROM duels WHERE duelid=%s AND accepted=false', (getCurrentDuel(trigger.nick),))
+		cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
+		elif waiting[5]==1:
+			bot.reply('\00313Too late, you already accepted it! .forfeit if you don\'t want to keep fighting!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
