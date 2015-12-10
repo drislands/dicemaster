@@ -13,6 +13,7 @@ import string
 
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = False
+showWinningRolls = True
 # whether or not to show debug logs
 DEBUG = False
 
@@ -689,7 +690,7 @@ def attackDuel(bot, trigger):
 				else:
 					cur.execute('UPDATE duels SET stage=1,dice=0 WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 					cur.execute('UPDATE players SET curhp=curhp-%s WHERE id=%s' % (hits,opponent))
-					bot.say('\00313%s: You have %s/%s HP remaining!' % (opponent,getCurHP(opponent),getMaxHP(opponent)))
+					bot.say('\00313%s: You have %s/%s HP remaining!' % (getName(opponent),getCurHP(opponent),getMaxHP(opponent)))
 					bot.reply('\00313Successful riposte! It is your turn to .attack!')
 
 			else:
@@ -791,6 +792,8 @@ def defendDuel(bot, trigger):
 			# react according to the situation, ie stun, riposte, neither
 			newDice = duelResults[9] - hits
 			if isStun:
+				if showWinningRolls:
+					bot.say('\00313%s got a dex roll of %s, and %s got a str roll of %s.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % opponent)
@@ -804,6 +807,8 @@ def defendDuel(bot, trigger):
 					bot.reply('\00313Your armour blocks some of the attack, but %s\'s blow winds you!' % getName(opponent))
 					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (getName(opponent),newDice))
 			elif isRiposte:
+				if showWinningRolls:
+					bot.say('\00313%s got a dex roll of %s, and %s got a str roll of %s.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
