@@ -716,7 +716,7 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
-					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (opponent,winBoosts))
+					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (getName(opponent),loseRerolls,rollBoostRate))
