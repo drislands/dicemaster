@@ -793,7 +793,7 @@ def defendDuel(bot, trigger):
 			newDice = duelResults[9] - hits
 			if isStun:
 				if showWinningRolls:
-					bot.say('\00313%s got a dex roll of %s, and %s got a str roll of %s.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
+					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
 					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % opponent)
@@ -808,7 +808,7 @@ def defendDuel(bot, trigger):
 					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (getName(opponent),newDice))
 			elif isRiposte:
 				if showWinningRolls:
-					bot.say('\00313%s got a dex roll of %s, and %s got a str roll of %s.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
+					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.', (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
