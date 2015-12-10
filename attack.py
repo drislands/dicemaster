@@ -372,11 +372,14 @@ def rerollStats(bot, trigger):
 @module.commands('boost')
 def boostStat(bot, trigger):
 	testDB(db,cur)
-	stat = trigger.group(2).lower()
+	if trigger.group(2):
+		stat = trigger.group(2).lower()
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getBoosts(getID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat boosts remaining!')
+	elif not trigger.group(2):
+		bot.reply('\00313You need to pick a stat to .boost! Att(ack), Def(ense), Dex(terity), Str(ength) and HP (Health) are your options.')
 	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity' or stat=='dex' or stat=='str' or stat=='att' or stat=='def' or stat=='health'):
 		if stat=='attack' or stat=='att':
 			cur.execute('UPDATE players SET attack=attack+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
