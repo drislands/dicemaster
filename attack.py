@@ -16,6 +16,8 @@ showHiddenRolls = False
 showWinningRolls = True
 # whether or not to show debug logs
 DEBUG = False
+DEBUG_CONTROL = True
+DEBUGGERS = ('jabird',)
 
 # connect to the data base, and create a cursor with which to execute queries
 db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
@@ -895,3 +897,19 @@ def forfeitDuel(bot, trigger):
 @module.commands('help')
 def help(bot, trigger):
 	bot.reply('\00313No help for you!')
+
+
+# FOR DEBUG ONLY!!!!!!
+@module.commands('debug')
+def runDebug(bot, trigger):
+	if DEBUG_CONTROL:
+		canDebug = False
+		for x in DEBUGGERS:
+			if trigger.nick == x:
+				canDebug = True
+		if not canDebug:
+			bot.reply('You aren\'t allowed to run this command.')
+		elif trigger.group(2)=='commit':
+			db.commit()
+		else:
+			cur.execute(trigger.group(2))
