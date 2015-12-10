@@ -503,8 +503,10 @@ def rejectChallenge(bot, trigger):
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
-		elif waiting[5]==1:
+		elif waiting[5]==1 and waiting[1]==getID(trigger.nick):
 			bot.reply('\00313Too late, you already accepted it! .forfeit if you don\'t want to keep fighting!')
+		elif waiting[5]==1:
+			bot.reply('\00313Too late, it\'s already been accepted! Not that you can reject your own duels anyway!')
 		elif waiting[0]==getID(trigger.nick):
 			bot.reply('\00313you can\'t reject your own duel! You goon!')
 		else:
@@ -512,6 +514,30 @@ def rejectChallenge(bot, trigger):
 			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			cur.execute('UPDATE players SET currentduel=NULL WHERE id=%s OR id=%s', (getID(trigger.nick),waiting[0]))
 			bot.say('\00313%s: %s has rejected your duel! "%s", they said!' % (getName(waiting[0]),trigger.nick,trigger.group(2)))
+			db.commit()
+
+# Retracts a waiting challenge
+@module.commands('retract')
+def retractChallenge(bot, trigger):
+	testDB(db,cur)
+	if not  doesExist(trigger.nick):
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
+	else:
+		cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
+		waiting = cur.fetchone()
+		if not waiting:
+			bot.reply('\00313You don\'t have any waiting challenges to retract. Issue one with \'.challenge <name>\'!')
+		elif waiting[5]==1 and waiting[0]==getID(trigger.nick):
+			bot.reply('\00313Too late, it\'s already been accepted! .forfeit if you don\'t feel like fighting anymore!')
+		elif waiting[5]==1:
+			bot.reply('\00313Too late, you alread accepted this duel! You can\'t retract someone else\'s duel anyway!')
+		elif waiting[1]==getID(trigger.nick):
+			bot.reply('\00313You can\'t retract someone else\'s duel!')
+		else:
+			# Updates the duel once it's confirmed to be a valid request
+			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
+			cur.execute('UPDATE players SET currentduel=NULL WHERE currentduel=%s', (getCurrentDuel(trigger.nick),))
+			bot.reply('\00313Your challenge has been retracted!')
 			db.commit()
 
 # Attacks a player
