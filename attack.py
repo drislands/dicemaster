@@ -11,6 +11,8 @@ import re
 import random
 import string
 
+# if true, then whoever is not the favoured player winning gets a bonus stat point
+favourPoints = True
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = False
 showWinningRolls = True
@@ -493,7 +495,7 @@ def acceptChallenge(bot, trigger):
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('UPDATE duels SET accepted=true, active=true WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			bot.say('\00313%s: %s has accepted your challenge!' % (getName(waiting[0]),trigger.nick))
-			bot.say('\00313The duel between %s and %s is now beginning, with the defender, %s, having the first move!' % (trigger.nick,getName(waiting[0]),trigger.nick))
+			bot.say('\00313The duel between %s and %s is now beginning. The favoured player is %s. The defender, %s, has the first move!' % (trigger.nick,getName(waiting[0]),getName(waiting[3]),trigger.nick))
 			db.commit()
 
 # Rejects a duel from another player
@@ -667,6 +669,10 @@ def attackDuel(bot, trigger):
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
+					# grant additional points if the favour bonus is in effect
+					if duelResults[3]==getID(trigger.nick) and favourPoints:
+						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
+						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (getName(opponent),loseRerolls,rollBoostRate))
@@ -721,6 +727,10 @@ def attackDuel(bot, trigger):
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
+					# grant additional points if the favour bonus is in effect
+					if duelResults[3]==getID(trigger.nick) and favourPoints:
+						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
+						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
 					cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE id=%s' % (loseRerolls,opponent))
 					bot.say('\00313%s: Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (getName(opponent),loseRerolls,rollBoostRate))
@@ -889,7 +899,7 @@ def forfeitDuel(bot, trigger):
 			# grant the winner their boost(s) and set HP to max
 			cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=null WHERE id=%s' % (winBoosts,opponent))
 			bot.say('\00313%s: You are the winner of the duel against %s! You have gained %s stat point(s) for your victory!' % (getName(opponent),trigger.nick,winBoosts))
-			# grant the loser a reroll and set his HP to max
+		# grant the loser a reroll and set his HP to max
 			cur.execute('UPDATE players SET rerolls=rerolls+%s,curhp=maxhp,currentduel=null WHERE name=\'%s\'' % (loseRerolls,trigger.nick))
 			bot.reply('\00313Better luck next time. You get %s stat reroll(s), tradable for %s stat point(s) each.' % (loseRerolls,rollBoostRate))
 			bot.say('\00313The duel between %s and %s has officially ended. The winner was %s! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),getName(opponent)))
