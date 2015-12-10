@@ -670,7 +670,7 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant additional points if the favour bonus is in effect
-					if duelResults[3]==getID(trigger.nick) and favourPoints:
+					if duelResults[3]!=getID(trigger.nick) and favourPoints:
 						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
 						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
@@ -728,7 +728,7 @@ def attackDuel(bot, trigger):
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant additional points if the favour bonus is in effect
-					if duelResults[3]==getID(trigger.nick) and favourPoints:
+					if duelResults[3]!=getID(trigger.nick) and favourPoints:
 						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
 						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
