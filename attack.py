@@ -17,7 +17,7 @@ showWinningRolls = True
 # whether or not to show debug logs
 DEBUG = False
 DEBUG_CONTROL = True
-DEBUGGERS = ('jabird',)
+DEBUGGERS = ('jabird','dad')
 
 # connect to the data base, and create a cursor with which to execute queries
 db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
@@ -86,6 +86,7 @@ neDxTh = 0
 # how many boosts you get for losing/winning
 winBoosts = 0
 loseBoosts = 0
+favourBoosts = 0
 # how many points a stat is boosted per boost
 boostVal = 0
 # how many rerolls you get for losing/winning
@@ -103,7 +104,7 @@ def setProfile(profile):
 	varStats = cur.fetchone()
 	# TODO: LOOK INTO HASHES
 	# this line is a mess lol. can't think of any other way to do this though
-	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod
+	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,favourBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod
 	## stat variables
 	minAtt = varStats[1]
 	minDef = varStats[2]
@@ -156,16 +157,17 @@ def setProfile(profile):
 	# boost points gained per win/loss
 	winBoosts = varStats[41]
 	loseBoosts = varStats[42]
-	boostVal = varStats[43]
+	favourBoosts = varStats[43]
+	boostVal = varStats[44]
 	# rerolls gained per win/loss
-	winRerolls = varStats[44]
-	loseRerolls = varStats[45]
+	winRerolls = varStats[45]
+	loseRerolls = varStats[46]
 	# how many boosts per roll
-	rollBoostRate = varStats[46]
+	rollBoostRate = varStats[47]
 	# how many rolls per boost
-	boostToRoll = varStats[47]
+	boostToRoll = varStats[48]
 	# multiplier for HP boost
-	hpBoostMod = varStats[48]
+	hpBoostMod = varStats[49]
 
 # set the current profile to the default one specified in the database
 setProfile(curProfile)
@@ -913,3 +915,4 @@ def runDebug(bot, trigger):
 			db.commit()
 		else:
 			cur.execute(trigger.group(2))
+			bot.reply('Query was successful.')
