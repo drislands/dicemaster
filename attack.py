@@ -291,8 +291,8 @@ def getStats(bot, trigger):
 			results = cur.fetchone()
 			if results:
 				if results[0]==getID(trigger.group(2)):
-					opponent = results[1]
-					if opponent==getID(trigger.nick):
+					opponent = getName(results[1])
+					if opponent==trigger.nick:
 						opponent = 'you'
 					else:
 						opponent = getName(opponent)
@@ -301,7 +301,7 @@ def getStats(bot, trigger):
 					else:
 						bot.reply('\00313They currently are awaiting %s for a response to their challenge.' % opponent)
 				else:
-					opponent = getID(results[0])
+					opponent = getName(results[0])
 					if opponent==trigger.nick:
 						opponent = 'you'
 					if results[2]:
