@@ -502,6 +502,8 @@ def rejectChallenge(bot, trigger):
 			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
 		elif waiting[5]==1:
 			bot.reply('\00313Too late, you already accepted it! .forfeit if you don\'t want to keep fighting!')
+		elif waiting[0]==getID(trigger.nick):
+			bot.reply('\00313you can\'t reject your own duel! You goon!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
