@@ -372,22 +372,22 @@ def rerollStats(bot, trigger):
 @module.commands('boost')
 def boostStat(bot, trigger):
 	testDB(db,cur)
-	stat = trigger.group(2)
+	stat = trigger.group(2).lower()
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif getBoosts(getID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat boosts remaining!')
-	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity'):
-		if stat=='attack':
+	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity' or stat=='dex' or stat=='str' or stat=='att' or stat=='def' or stat=='health'):
+		if stat=='attack' or stat=='att':
 			cur.execute('UPDATE players SET attack=attack+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
 			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(getID(trigger.nick))))
-		elif stat=='defense':
+		elif stat=='defense' or stat=='def':
 			cur.execute('UPDATE players SET defense=defense+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
 			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(getID(trigger.nick))))
-		elif stat=='strength':
+		elif stat=='strength' or stat=='str':
 			cur.execute('UPDATE players SET strength=strength+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
 			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(getID(trigger.nick))))
-		elif stat=='dexterity':
+		elif stat=='dexterity' or stat=='dex':
 			cur.execute('UPDATE players SET dexterity=dexterity+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
 			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(getID(trigger.nick))))
 		else:
