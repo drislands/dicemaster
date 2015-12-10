@@ -430,6 +430,8 @@ def challengePlayer(bot, trigger):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif not doesExist(trigger.group(2)):
 		bot.reply('\00313There is no player called %s, I\'m afraid. Tell them to \'.createplayer\'!' % trigger.group(2))
+	elif trigger.group(2)==trigger.nick:
+		bot.reply('\00313You can\'t challenge yourself!')
 	else:
 		# check to see if there are any active duels with the player
 		cur.execute('SELECT * FROM players WHERE name=%s AND currentduel IS NOT NULL', (trigger.nick,))
