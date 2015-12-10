@@ -91,6 +91,8 @@ loseRerolls = 0
 # exchange rate between rerolls and stat boosts
 rollBoostRate = 0
 boostToRoll = 0
+# HP boost modifier, if any
+hpBoostMod = 0
 
 def setProfile(profile):
 	testDB(db,cur)
@@ -98,7 +100,7 @@ def setProfile(profile):
 	varStats = cur.fetchone()
 	# TODO: LOOK INTO HASHES
 	# this line is a mess lol. can't think of any other way to do this though
-	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll
+	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod
 	## stat variables
 	minAtt = varStats[1]
 	minDef = varStats[2]
@@ -159,6 +161,8 @@ def setProfile(profile):
 	rollBoostRate = varStats[46]
 	# how many rolls per boost
 	boostToRoll = varStats[47]
+	# multiplier for HP boost
+	hpBoostMod = varStats[48]
 
 # set the current profile to the default one specified in the database
 setProfile(curProfile)
@@ -386,8 +390,8 @@ def boostStat(bot, trigger):
 			cur.execute('UPDATE players SET dexterity=dexterity+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
 			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(getID(trigger.nick))))
 		else:
-			cur.execute('UPDATE players SET maxhp=maxhp+%s,curhp=curhp+%s WHERE name=\'%s\'' % trigger.nick)
-			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal,getMaxHP(getID(trigger.nick))))
+			cur.execute('UPDATE players SET maxhp=maxhp+%s,curhp=curhp+%s WHERE name=\'%s\'' % (boostVal*hpBoostMod,boostVal*hpBoostMod,trigger.nick))
+			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal*hpBoostMod,getMaxHP(getID(trigger.nick))))
 		cur.execute('UPDATE players SET boosts=boosts-1,used_boosts=used_boosts+1 WHERE name=\'%s\'' % trigger.nick)
 		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(getID(trigger.nick)),getUsedBoosts(getID(trigger.nick))))
 		db.commit()
