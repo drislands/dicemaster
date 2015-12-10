@@ -448,11 +448,11 @@ def challengePlayer(bot, trigger):
 		elif youWaiting:
 			bot.reply('\00313There is already a challenge from %s waiting on your response!' % youWaiting[0])
 		elif themActive:
-			bot.reply('\00313%s is already in a duel. Wait for them to finish!', (trigger.group(2),))
+			bot.reply('\00313%s is already in a duel. Wait for them to finish!' % trigger.group(2))
 		elif themChallenging:
-			bot.reply('\00313%s has challenged %s for a duel and cannot accept duels at this time.', ((trigger.group(2),themChallenging[1])))
+			bot.reply('\00313%s has challenged %s for a duel and cannot accept duels at this time.' % ((trigger.group(2),themChallenging[1])))
 		elif themWaiting:
-			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.', ((trigger.group(2),themWaiting[0])))
+			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.' % ((trigger.group(2),themWaiting[0])))
 		else:
 			# creates the duel data 
 			chaTot = getMaxHP(getID(trigger.nick)) + getAtt(getID(trigger.nick)) + getDef(getID(trigger.nick)) + getStr(getID(trigger.nick)) + getDex(getID(trigger.nick))
