@@ -493,7 +493,7 @@ def acceptChallenge(bot, trigger):
 			db.commit()
 
 # Rejects a duel from another player
-@module.commands('reject')
+@module.commands('reject','decline','pansyout')
 def rejectChallenge(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
@@ -517,7 +517,7 @@ def rejectChallenge(bot, trigger):
 			db.commit()
 
 # Retracts a waiting challenge
-@module.commands('retract')
+@module.commands('retract','maybenot')
 def retractChallenge(bot, trigger):
 	testDB(db,cur)
 	if not  doesExist(trigger.nick):
@@ -541,7 +541,7 @@ def retractChallenge(bot, trigger):
 			db.commit()
 
 # Attacks a player
-@module.commands('attack')
+@module.commands('attack','attack!')
 def attackDuel(bot, trigger):
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
