@@ -796,7 +796,7 @@ def defendDuel(bot, trigger):
 					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.' % (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
-					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % opponent)
+					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % getID(trigger.nick))
 					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName(opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
