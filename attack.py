@@ -10,7 +10,7 @@ import MySQLdb
 import re
 import random
 import string
-import datetime
+import time
 
 # if true, then whoever is not the favoured player winning gets a bonus stat point
 favourPoints = True
@@ -341,6 +341,20 @@ def getQuickStats(bot, trigger):
 		bot.reply('\00313Str: %s' % results[5])
 		bot.reply('\00313Dex: %s' % results[6])
 		bot.reply('\00313HP: %s/%s' % (results[8],results[7]))
+
+# Quick HP for you or another player
+@module.commands('qhp')
+def getQuickHP(bot, trigger):
+	testDB(db,cur)
+	if trigger.group(2):
+		if not doesExist(trigger.group(2)):
+			bot.reply('\00313There is no player called %s.' % trigger.group(2))
+		else:
+			bot.reply('\00313%s\'s HP: %s/%s' % (trigger.group(2),getCurHP(getID(trigger.group(2))),getMaxHP(getID(trigger.group(2)))))
+	elif not doesExist(trigger.nick):
+		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
+	else:
+		bot.reply('\00313Your HP: %s/%s' % (getCurHP(getID(trigger.nick)),getMaxHP(getID(trigger.nick))))
 
 # List of Players
 @module.commands('players')
@@ -780,7 +794,7 @@ def defendDuel(bot, trigger):
 		elif duelResults[8]==1 or duelResults[8]==3 or duelResults[8]==4:
 			bot.reply('\00313It\'s your turn to .attack, not defend!')
 		elif duelResults[8]==2:
-			rolls = "Defense roll: "
+			rolls = "\00313Defense roll: "
 			hits = 0
 			if duelResults[0]==getID(trigger.nick):
 				opponent = duelResults[1]
