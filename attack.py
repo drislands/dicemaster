@@ -10,6 +10,7 @@ import MySQLdb
 import re
 import random
 import string
+import datetime
 
 # if true, then whoever is not the favoured player winning gets a bonus stat point
 favourPoints = True
@@ -247,6 +248,7 @@ def createPlayer(bot, trigger):
 	if doesExist(trigger.nick):
 		bot.reply('\00313Your player already exists!')
 	else:
+		random.seed(time.time())
 		# generate stats based on variables set above
 		att = random.randint(minAtt,maxAtt)
 		defense = random.randint(minDef,maxDef)
@@ -356,6 +358,7 @@ def getPlayers(bot, trigger):
 # Reroll your stats
 @module.commands('reroll')
 def rerollStats(bot, trigger):
+	random.seed(time.time())
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
@@ -470,7 +473,7 @@ def challengePlayer(bot, trigger):
 			defTot = getMaxHP(getID(trigger.group(2))) + getAtt(getID(trigger.group(2))) + getDef(getID(trigger.group(2))) + getStr(getID(trigger.group(2))) + getDex(getID(trigger.group(2)))
 			if chaTot > defTot:
 				favour = trigger.nick
-			else:
+			elif defTot > chaTot:
 				favour = trigger.group(2)
 			duelID = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
 			cur.execute('INSERT INTO duels VALUES(%s,%s,false,%s,NULL,false,%s,%s,1,0,0);', (getID(trigger.nick), getID(trigger.group(2)),getID(favour),getID(trigger.group(2)),duelID))
@@ -497,7 +500,11 @@ def acceptChallenge(bot, trigger):
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('UPDATE duels SET accepted=true, active=true WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			bot.say('\00313%s: %s has accepted your challenge!' % (getName(waiting[0]),trigger.nick))
-			bot.say('\00313The duel between %s and %s is now beginning. The favoured player is %s. The defender, %s, has the first move!' % (trigger.nick,getName(waiting[0]),getName(waiting[3]),trigger.nick))
+			if waiting[3]:
+				favourString = 'The favoured player is ' + getName(waiting[3]) + '. '
+			else:
+				favourString = ''
+			bot.say('\00313The duel between %s and %s is now beginning. %sThe defender, %s, has the first move!' % (trigger.nick,getName(waiting[0]),favourString,trigger.nick))
 			db.commit()
 
 # Rejects a duel from another player
@@ -551,6 +558,7 @@ def retractChallenge(bot, trigger):
 # Attacks a player
 @module.commands('attack','attack!')
 def attackDuel(bot, trigger):
+	random.seed(time.time())
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
@@ -751,6 +759,7 @@ def attackDuel(bot, trigger):
 # The defend command!
 @module.commands('defend')
 def defendDuel(bot, trigger):
+	random.seed(time.time())
 	testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
