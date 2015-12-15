@@ -14,6 +14,7 @@ import time
 
 # if true, then whoever is not the favoured player winning gets a bonus stat point
 favourPoints = True
+fixedRiposte = False
 # whether or not to show the dexterity and strength rolls
 showHiddenRolls = False
 showWinningRolls = True
@@ -100,6 +101,8 @@ rollBoostRate = 0
 boostToRoll = 0
 # HP boost modifier, if any
 hpBoostMod = 0
+# Determines how many dice are used in a Riposte roll
+riposteDice = 0
 
 def setProfile(profile):
 	testDB(db,cur)
@@ -107,7 +110,7 @@ def setProfile(profile):
 	varStats = cur.fetchone()
 	# TODO: LOOK INTO HASHES
 	# this line is a mess lol. can't think of any other way to do this though
-	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,favourBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod
+	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,favourBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod,riposteDice
 	## stat variables
 	minAtt = varStats[1]
 	minDef = varStats[2]
@@ -171,6 +174,8 @@ def setProfile(profile):
 	boostToRoll = varStats[48]
 	# multiplier for HP boost
 	hpBoostMod = varStats[49]
+	# dice for riposte roll
+	riposteDice = varStats[50]
 
 # set the current profile to the default one specified in the database
 setProfile(curProfile)
@@ -239,6 +244,19 @@ def getStatus(ID):
 	testDB(db,cur)
 	cur.execute('SELECT Status FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
+
+## Determining logic for stuns and ripostes
+def mayStun(strength,defense):
+	if strength > ((defense * 2) - 1):
+		return True
+	else:
+		return False
+
+def mayRiposte(dexterity,attack,defense):
+	if int((dexterity + defense) / 2) > ((attack * 2) - 1):
+		return True
+	else:
+		return False
 
 #### defining more complicated functions that involve queries
 # Creates a player with the name of the user who called it, and random stats
@@ -854,15 +872,21 @@ def defendDuel(bot, trigger):
 			## duelResults[9] is the Hit roll from last time, and [10] is the Str roll
 			isStun = False
 			isRiposte = False
-			if duelResults[10] > ((2 * hits) - 1) and spHits > ((2 * duelResults[9]) - 1):
+			
+			if mayStun(duelResults[10],hits) and mayRiposte(spHits,duelResults[9],hits):
 				if (duelResults[10] + duelResults[9]) > (hits + spHits):
 					isStun = True
 				elif (duelResults[10] + duelResults[9]) < (hits + spHits):
 					isRiposte = True
-			elif duelResults[10] > ((2 * hits) - 1) and duelResults[10] > 0:
+			elif mayStun(duelResults[10],hits):
 				isStun = True
-			elif spHits > ((2 * duelResults[9]) - 1) and spHits > 0:
+			elif mayRiposte(spHits,duelResults[9],hits):
 				isRiposte = True
+			
+	#		elif duelResults[10] > ((2 * hits) - 1) and duelResults[10] > 0:
+	#			isStun = True
+	#		elif spHits > ((2 * duelResults[9]) - 1) and spHits > 0:
+	#			isRiposte = True
 			# react according to the situation, ie stun, riposte, neither
 			newDice = duelResults[9] - hits
 			if isStun:
@@ -881,16 +905,18 @@ def defendDuel(bot, trigger):
 					bot.reply('\00313Your armour blocks some of the attack, but %s\'s blow winds you!' % getName(opponent))
 					bot.say('\00313%s: You have _%s_ remaining dice for damage, and you will have the opportunity to .attack again after due to your stun!' % (getName(opponent),newDice))
 			elif isRiposte:
+				if not fixedRiposte:
+					riposteDice = int(((spHits + hits) / 2) - duelResults[9])
 				if showWinningRolls:
 					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.' % (trigger.nick,spHits,getName(opponent),duelResults[10]))
-				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was
-					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
+				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was EDIT: now we're just giving you 6
+					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (riposteDice,getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
 				elif newDice < 1:
-					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
+					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (riposteDice,getCurrentDuel(trigger.nick)))
 					bot.reply('\00313You are able to swiftly and deftly parry %s\'s attack away! You can now .attack with a riposte!' % getName(opponent))
 				else:
-					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (spHits-duelResults[9],getCurrentDuel(trigger.nick)))
+					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (riposteDice,getCurrentDuel(trigger.nick)))
 					bot.reply('\00313%s\'s attack nearly strikes you, but you parry them away at the last second, catching them off guard! You can now .attack with a riposte!' % getName(opponent))
 			else:
 				if hits < 1:
