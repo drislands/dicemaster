@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS `active_effects`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `active_effects` (
   `Name` varchar(40) DEFAULT NULL,
+  `ItemType` varchar(40) DEFAULT NULL,
   `EffectID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Scope` varchar(40) DEFAULT NULL,
   `Type` varchar(40) DEFAULT NULL,
@@ -191,15 +192,7 @@ CREATE TABLE `inventory` (
   KEY `Back` (`Back`),
   KEY `MainHand` (`MainHand`),
   KEY `OffHand` (`OffHand`),
-  CONSTRAINT `inventory_ibfk_9` FOREIGN KEY (`OffHand`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`ID`) REFERENCES `players` (`id`),
-  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`Head`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_3` FOREIGN KEY (`Shoulders`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_4` FOREIGN KEY (`Hands`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_5` FOREIGN KEY (`Legs`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_6` FOREIGN KEY (`Feet`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_7` FOREIGN KEY (`Back`) REFERENCES `item_definitions` (`ItemID`),
-  CONSTRAINT `inventory_ibfk_8` FOREIGN KEY (`MainHand`) REFERENCES `item_definitions` (`ItemID`)
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`ID`) REFERENCES `players` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -209,7 +202,7 @@ CREATE TABLE `inventory` (
 
 LOCK TABLES `inventory` WRITE;
 /*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
-INSERT INTO `inventory` VALUES (1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'3 6'),(2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'4');
+INSERT INTO `inventory` VALUES (3,NULL,NULL,NULL,NULL,NULL,NULL,NULL,7,NULL);
 /*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -253,9 +246,8 @@ CREATE TABLE `items` (
   `Owner` int(10) unsigned DEFAULT '0',
   `Status` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`ID`),
-  KEY `ItemID` (`ItemID`),
-  CONSTRAINT `items_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `item_definitions` (`ItemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+  KEY `ItemID` (`ItemID`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -264,7 +256,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (3,1,1,'new'),(4,1,2,'new'),(6,2,1,'new');
+INSERT INTO `items` VALUES (3,1,1,'new'),(4,1,2,'new'),(6,2,1,'new'),(7,1,3,'new');
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -277,6 +269,7 @@ DROP TABLE IF EXISTS `passive_effects`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `passive_effects` (
   `Name` varchar(40) DEFAULT NULL,
+  `ItemType` varchar(40) DEFAULT NULL,
   `EffectID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Scope` varchar(40) DEFAULT NULL,
   `Stat` varchar(20) DEFAULT NULL,
@@ -293,7 +286,7 @@ CREATE TABLE `passive_effects` (
 
 LOCK TABLES `passive_effects` WRITE;
 /*!40000 ALTER TABLE `passive_effects` DISABLE KEYS */;
-INSERT INTO `passive_effects` VALUES ('small def up',1,'self','def',2,0,NULL),('small dex up',2,'self','dex',-2,0,NULL);
+INSERT INTO `passive_effects` VALUES ('small def up',NULL,1,'self','def',2,0,NULL),('small dex up',NULL,2,'self','dex',-2,0,NULL);
 /*!40000 ALTER TABLE `passive_effects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -321,7 +314,7 @@ CREATE TABLE `players` (
   `CurrentDuel` varchar(40) DEFAULT NULL,
   `Status` varchar(40) NOT NULL DEFAULT 'healthy',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -330,7 +323,7 @@ CREATE TABLE `players` (
 
 LOCK TABLES `players` WRITE;
 /*!40000 ALTER TABLE `players` DISABLE KEYS */;
-INSERT INTO `players` VALUES (1,0,'jabird',3,4,5,11,2,2,0,0,0,0,NULL,'healthy'),(2,0,'chris',15,4,2,8,3,3,0,0,0,0,NULL,'healthy');
+INSERT INTO `players` VALUES (3,0,'jabird',1,11,19,18,4,4,0,0,0,0,NULL,'healthy');
 /*!40000 ALTER TABLE `players` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -450,6 +443,7 @@ DROP TABLE IF EXISTS `weapon_parts`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `weapon_parts` (
   `PartID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Weapon` varchar(40) DEFAULT NULL,
   `PassiveEffect` int(10) unsigned DEFAULT NULL,
   `ActiveEffect` int(10) unsigned DEFAULT NULL,
   `Word` varchar(40) DEFAULT NULL,
@@ -457,8 +451,8 @@ CREATE TABLE `weapon_parts` (
   PRIMARY KEY (`PartID`),
   KEY `PassiveEffect` (`PassiveEffect`),
   KEY `ActiveEffect` (`ActiveEffect`),
-  CONSTRAINT `weapon_parts_ibfk_2` FOREIGN KEY (`ActiveEffect`) REFERENCES `active_effects` (`EffectID`),
-  CONSTRAINT `weapon_parts_ibfk_1` FOREIGN KEY (`PassiveEffect`) REFERENCES `passive_effects` (`EffectID`)
+  CONSTRAINT `weapon_parts_ibfk_1` FOREIGN KEY (`PassiveEffect`) REFERENCES `passive_effects` (`EffectID`),
+  CONSTRAINT `weapon_parts_ibfk_2` FOREIGN KEY (`ActiveEffect`) REFERENCES `active_effects` (`EffectID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -468,7 +462,7 @@ CREATE TABLE `weapon_parts` (
 
 LOCK TABLES `weapon_parts` WRITE;
 /*!40000 ALTER TABLE `weapon_parts` DISABLE KEYS */;
-INSERT INTO `weapon_parts` VALUES (1,1,NULL,'Firmness','boss'),(2,1,NULL,'Firm','enarmes'),(3,1,NULL,'Firm','bouche');
+INSERT INTO `weapon_parts` VALUES (1,'shield',1,NULL,'Firmness','boss'),(2,'shield',1,NULL,'Firm','enarmes'),(3,'shield',1,NULL,'Firm','bouche');
 /*!40000 ALTER TABLE `weapon_parts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -481,4 +475,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-12-17 20:18:25
+-- Dump completed on 2015-12-17 23:17:15

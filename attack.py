@@ -279,6 +279,10 @@ def getItemName(ID):
 	cur.execute('SELECT Name FROM item_definitions WHERE itemid=%s' % ID)
 	return cur.fetchone()[0]
 
+# a shortcut to getItemName(getExistID())
+def getExistName(ID):
+	return getItemName(getExistID(ID))
+
 # get the type of the item
 def getItemType(ID):
 	cur.execute('SELECT Type FROM item_definitions WHERE itemid=%s' % ID)
@@ -288,6 +292,11 @@ def getItemType(ID):
 # get type of weapon: main hand, off hand, one hand, both hands
 def getWeaponHand(ID):
 	cur.execute('SELECT Hand FROM weapon_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()[0]
+
+# get slot of weapon: head, shoulders, hands, legs, feet, back
+def getArmourSlot(ID):
+	cur.execute('SELECT Slot FROM armour_definitions WHERE itemid=%s' % ID)
 	return cur.fetchone()[0]
 
 ###
@@ -307,8 +316,11 @@ def removeFromInventory(PID,IID):
 	cur.execute('SELECT Inventory FROM inventory WHERE ID=%s' % PID)
 	inventory = list(cur.fetchone()[0])
 	inventory.remove(str(IID))
-	' '.join(inventory)
-	cur.execute('UPDATE inventory SET Inventory=%s', (inventory,))
+	if inventory:
+		' '.join(inventory)
+		cur.execute('UPDATE inventory SET Inventory=%s', (inventory,))
+	else:
+		cur.execute('UPDATE inventory SET Inventory=null')
 	db.commit()
 
 #
@@ -405,9 +417,9 @@ def getStats(bot, trigger):
 				holding = ''
 				for x in extendedInventory:
 					if x and holding:
-						holding = holding + ', ' + getItemName(getExistID(x))
+						holding = holding + ', ' + getExistName(x)
 					elif x:
-						holding = getItemName(getExistID(x))
+						holding = getExistName(x)
 				if holding:
 					bot.reply('\00313You are currently holding the following:')
 					bot.reply('\00313%s' % holding)
@@ -1079,24 +1091,24 @@ def getEquipped(bot, trigger):
 			bot.reply('\00313You are naked!!!!')
 		else:
 			if results[0]:
-				bot.reply('\00313Head: %s' % getItemName(getExistID(results[0])))
+				bot.reply('\00313Head: %s' % getExistName(results[0]))
 			if results[1]:
-				bot.reply('\00313Shoulders: %s' % getItemName(getExistID(results[1])))
+				bot.reply('\00313Shoulders: %s' % getExistName(results[1]))
 			if results[2]:
-				bot.reply('\00313Hands: %s' % getItemName(getExistID(results[2])))
+				bot.reply('\00313Hands: %s' % getExistName(results[2]))
 			if results[3]:
-				bot.reply('\00313Legs: %s' % getItemName(getExistID(results[3])))
+				bot.reply('\00313Legs: %s' % getExistName(results[3]))
 			if results[4]:
-				bot.reply('\00313Feet: %s' % getItemName(getExistID(results[4])))
+				bot.reply('\00313Feet: %s' % getExistName(results[4]))
 			if results[5]:
-				bot.reply('\00313Back: %s' % getItemName(getExistID(results[5])))
+				bot.reply('\00313Back: %s' % getExistName(results[5]))
 			if results[6] and results[6]==results[7]:
-				bot.reply('\00313Main and off hand: %s' % getItemName(getExistID(results[6])))
+				bot.reply('\00313Main and off hand: %s' % getExistName(results[6]))
 			else:
 				if results[6]:
-					bot.reply('\00313Main Hand: %s' % getItemName(getExistID(results[6])))
+					bot.reply('\00313Main Hand: %s' % getExistName(results[6]))
 				if results[7]:
-					bot.reply('\00313Head: %s' % getItemName(getExistID(results[7])))
+					bot.reply('\00313Off Hand: %s' % getExistName(results[7]))
 
 # show held items, i.e. in the Other column in the inventory table
 @module.commands('inventory')
@@ -1104,16 +1116,17 @@ def getMyInventory(bot, trigger):
 	if not doesExist(trigger.nick):
 		bot.reply('\00313You need to .createplayer first!')
 	else:
-		results = getInventory(getPlayerID(trigger.nick))[9].split()
+		results = getInventory(getPlayerID(trigger.nick))[9]
 		if not results:
 			bot.reply('\00313You are not holding anything.')
 		else:
+			results = results.split()
 			holding = ''
 			for x in results:
 				if holding:
-					holding = holding + ', ' + str(x) + ' -- ' + getItemName(getExistID(x))
+					holding = holding + ', ' + str(x) + ' -- ' + getExistName(x)
 				else:
-					holding = str(x) + ' -- ' + getItemName(getExistID(x))
+					holding = str(x) + ' -- ' + getExistName(x)
 			bot.reply('\00313You have, in your inventory, the following items:')
 			bot.reply('\00313%s' % holding)
 
@@ -1130,11 +1143,98 @@ def equipItem(bot, trigger):
 			bot.reply('\00313You need to specify what you want to equip. Check your .inventory to see your item IDs.')
 		else:
 			rest = rest.split()
-			if getItemType(rest[0])=='weapon' and not len(rest)==2 and not getWeaponHand(rest[0])=='both':
+			if getItemType(getExistID(rest[0]))=='weapon' and not len(rest)==2 and getWeaponHand(getExistID(rest[0]))=='one':
 				bot.reply('\00313You need to specify which hand the weapon is going to, as in \'.equip # HAND\', where # is the item ID and HAND is \'main\' or \'off\'.')
 			else:
-				if getItemType(rest[0]) == weapon:
-					## TODO!!!! KEEP WORKING ON EQUIP FUNCTION!!!! TODO
+				inventory = getInventory(PID)
+				if getItemType(getExistID(rest[0])) == 'weapon':
+					hand = getWeaponHand(getExistID(rest[0]))
+					if hand=='main' and inventory[7]:
+						bot.reply('\00313Your main hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[7]))
+						return
+					elif hand=='main':
+						cur.execute('UPDATE inventory SET MainHand=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313You are now wielding your %s in your main hand.' % getExistName(rest[0]))
+					elif hand=='off' and inventory[8]:
+						bot.reply('\00313Your off hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[8]))
+						return
+					elif hand=='off':
+						cur.execute('UPDATE inventory SET OffHand=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313You are now wielding your %s in your off hand.' % getExistName(rest[0]))
+					elif hand=='both' and (inventory[7] or inventory[8]):
+						if inventory[7] and inventory[8]:
+							bot.reply('\00313Your main hand is occupied by your %s, and your off hand is occupied by your %s. You must .unequip them first!' % (getExistName(inventory[7]),getExistName(inventory[8])))
+						elif inventory[7]:
+							bot.reply('\00313Your main hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[7]))
+						else:
+							bot.reply('\00313Your off hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[8]))
+					elif hand=='both':
+						cur.execute('UPDATE inventory SET MainHand=%s,OffHand=%s WHERE ID=%s', (rest[0],rest[0],PID))
+						bot.reply('\00313You are now wielding your %s in both hands.' % getExistName(rest[0]))
+					elif hand=='one':
+						if rest[1]=='main' and inventory[7]:
+							bot.reply('\00313Your main hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[7]))
+							return
+						elif rest[1]=='main':
+							cur.execute('UPDATE inventory SET MainHand=%s WHERE ID=%s', (rest[0],PID))
+							bot.reply('\00313You are now wielding your %s in your main hand.' % getExistName(rest[0]))
+						elif rest[1]=='off' and inventory[8]:
+							bot.reply('\00313Your off hand is occupied by your %s. You must .unequip it first!' % getExistName(inventory[8]))
+							return
+						elif rest[1]=='off':
+							cur.execute('UPDATE inventory SET OffHand=%s WHERE ID=%s', (rest[0],PID))
+							bot.reply('\00313You are now wielding your %s in your off hand.' % getExistName(rest[0]))
+						else:
+							bot.reply('\00313\'%s\' isn\'t a hand. You need to indicate \'main\' or \'off\'.')
+							return
+					else:
+						bot.reply('\00313Uhh...You shouldn\'t be seeing this. There must be something messed up in this item\'s Hand column. Check it out!')
+						return
+				elif getItemType(getExistID(rest[0]))=='armour':
+					slot = getArmourSlot(getExistID(rest[0]))
+					if slot=='head' and inventory[1]:
+						bot.reply('You are already wearing your %s on your head. You must .unequip it first!' % getExistName(inventory[1]))
+						return
+					elif slot=='head':
+						cur.execute('UPDATE inventory SET Head=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s is now on your head.' % getExistName(rest[0]))
+					elif slot=='shoulders' and inventory[2]:
+						bot.reply('\00313You are already wearing your %s on your shoulders. You must .unequip them first!' % getExistName(inventory[2]))
+						return
+					elif slot=='shoulders':
+						cur.execute('UPDATE inventory SET Shoulders=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s are now on your shoulders.' % getExistName(rest[0]))
+					elif slot=='hands' and inventory[3]:
+						bot.reply('\00313You are already wearing your %s on your hands. You must .unequip it first!' % getExistName(inventory[2]))
+						return
+					elif slot=='hands':
+						cur.execute('UPDATE inventory SET Hands=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s are now on your hands.' % getExistName(rest[0]))
+					elif slot=='legs' and inventory[4]:
+						bot.reply('\00313You are already wearing your %s on your legs. You must .unequip them first!' % getExistName(inventory[2]))
+						return
+					elif slot=='legs':
+						cur.execute('UPDATE inventory SET Legs=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s are now on your legs.' % getExistName(rest[0]))
+					elif slot=='feet' and inventory[5]:
+						bot.reply('\00313You are already wearing your %s on your feet. You must .unequip them first!' % getExistName(inventory[2]))
+						return
+					elif slot=='feet':
+						cur.execute('UPDATE inventory SET Feet=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s are now on your feet.' % getExistName(rest[0]))
+					elif slot=='back' and inventory[6]:
+						bot.reply('\00313You are already wearing your %s on your back. You must .unequip it first!' % getExistName(inventory[2]))
+						return
+					elif slot=='back':
+						cur.execute('UPDATE inventory SET Shoulders=%s WHERE ID=%s', (rest[0],PID))
+						bot.reply('\00313Your %s is now on your back.' % getExistName(rest[0]))
+					else:
+						bot.reply('\00313Errr.....You really shouldn\'t be seeing this. There must be something messed up in this item\'s Slot column. Check it out!')
+						return
+				else:
+					bot.reply('\00313This item is not equippable.')
+					return
+				removeFromInventory(PID,rest[0])
 
 # Unequip a slot
 @module.commands('unequip')
@@ -1195,7 +1295,7 @@ def unequipItem(bot, trigger):
 			else:
 				bot.reply('\00313You have nothing equipped in slot %s.' % slot)
 				return
-			bot.reply('\00313Your %s has been unequipped and returned to your inventory.' % getItemName(getExistID(thing)))
+			bot.reply('\00313Your %s has been unequipped and returned to your inventory.' % getExistName(thing))
 			db.commit()
 
 ####################################
