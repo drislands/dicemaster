@@ -21,18 +21,21 @@ showWinningRolls = True
 # whether or not to show debug logs
 DEBUG = False
 DEBUG_CONTROL = True
+ADMIN_CONTROL = True
+ADMINS = ('jabird',)
 DEBUGGERS = ('jabird','dad')
 
 # connect to the data base, and create a cursor with which to execute queries
 db = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
 cur = db.cursor()
 
+### commenting out since this hasn't helped yet
 #function to make sure that the db is still connected
-def testDB(myDB,myCur):
-	try:
-		myCur.execute('SELECT * FROM players;')
-	except (AttributeError, MySQLdb.OperationalError):
-		myDB = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
+#def testDB(myDB,myCur):
+#	try:
+#		myCur.execute('SELECT * FROM players;')
+#	except (AttributeError, MySQLdb.OperationalError):
+#		myDB = MySQLdb.connect(host="localhost",user="dicebot",passwd="megadicebot",db="dicebot")
 
 # set the correct profile
 cur.execute('SELECT currentP FROM currentprofile WHERE ph=1');
@@ -105,10 +108,9 @@ hpBoostMod = 0
 riposteDice = 0
 
 def setProfile(profile):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT * FROM variableprofiles WHERE name=\'%s\'' % profile)
 	varStats = cur.fetchone()
-	# TODO: LOOK INTO HASHES
 	# this line is a mess lol. can't think of any other way to do this though
 	global minAtt,minDef,minHP,minStr,minDex,maxAtt,maxDef,maxHP,maxStr,maxDex,hitDie,defDie,attDie,strDie,dexDie,hitThr,defThr,attThr,strThr,dexThr,dubHit,dubDef,dubAtt,dubStr,dubDex,duHiTh,duDfTh,duAtTh,duStTh,duDxTh,negHit,negDef,negAtt,negStr,negDex,neHiTh,neDfTh,neAtTh,neStTh,neDxTh,winBoosts,loseBoosts,favourBoosts,boostVal,winRerolls,loseRerolls,rollBoostRate,boostToRoll,hpBoostMod,riposteDice
 	## stat variables
@@ -181,70 +183,138 @@ def setProfile(profile):
 setProfile(curProfile)
 # defining regularly used queries as functions
 def getAtt(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT attack FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getDef(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT defense FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getStr(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT strength FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getDex(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT dexterity FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
-def getID(name):
-	testDB(db,cur)
+def getPlayerID(name):
+	#testDB(db,cur)
 	cur.execute('SELECT ID FROM players WHERE name=%s', (name,))
 	return cur.fetchone()[0]
 def getName(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT name FROM players WHERE id=%s' % ID)
 	return cur.fetchone()[0]
 def getMaxHP(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT maxhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getCurHP(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT curhp FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getActive(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT active FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def doesExist(name):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT * FROM players WHERE name=%s', (name,))
 	return cur.fetchone()
 def getBoosts(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getUsedBoosts(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT Used_Boosts FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getRerolls(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getUsedRerolls(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT Used_Rerolls FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 def getCurrentDuel(name):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT CurrentDuel FROM players WHERE name=\'%s\'' % name)
 	return cur.fetchone()[0]
 def getStatus(ID):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT Status FROM players WHERE ID=%s' % ID)
 	return cur.fetchone()[0]
 
+################
+# Getters for equipment-based information
+# TODO: make this stuff lol TODO
+def getInventory(ID):
+	cur.execute('SELECT * FROM inventory WHERE ID=%s' % ID)
+	return cur.fetchone()
+
+# does item exist?
+def doesItemExist(name):
+	cur.execute('SELECT * FROM item_definitions WHERE name=%s', (name,))
+	return cur.fetchone()
+
+# get the item id from an item name
+def getItemID(name):
+	cur.execute('SELECT ItemID FROM item_definitions WHERE name=%s', (name,))
+	return cur.fetchone()[0]
+
+# get the itemid from existing item
+def getExistItemID(ID):
+	cur.execute('SELECT ID FROM items WHERE itemid=%s' % ID)
+	return cur.fetchone()[0]
+
+# get the existing ID from an itemid
+def getExistID(ID):
+	cur.execute('SELECT ItemID FROM items WHERE id=%s' % ID)
+	return cur.fetchone()[0]
+
+# get the item name from item id
+def getItemName(ID):
+	cur.execute('SELECT Name FROM item_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()[0]
+
+# get the type of the item
+def getItemType(ID):
+	cur.execute('SELECT Type FROM item_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()[0]
+
+###
+# get type of weapon: main hand, off hand, one hand, both hands
+def getWeaponHand(ID):
+	cur.execute('SELECT Hand FROM weapon_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()[0]
+
+###
+# add item to inventory
+def addToInventory(PID,IID):
+	cur.execute('SELECT Inventory FROM inventory WHERE ID=%s' % PID)
+	inventory = cur.fetchone()[0]
+	if inventory:
+		inventory = inventory + ' ' + str(IID)
+	else:
+		inventory = str(IID)
+	cur.execute('UPDATE inventory SET Inventory=%s', (inventory,))
+	db.commit()
+
+# remove an item from inventory
+def removeFromInventory(PID,IID):
+	cur.execute('SELECT Inventory FROM inventory WHERE ID=%s' % PID)
+	inventory = list(cur.fetchone()[0])
+	inventory.remove(str(IID))
+	' '.join(inventory)
+	cur.execute('UPDATE inventory SET Inventory=%s', (inventory,))
+	db.commit()
+
+#
+################
+
+########
 ## Determining logic for stuns and ripostes
 def mayStun(strength,defense):
 	if strength > ((defense * 2) - 1):
@@ -257,12 +327,14 @@ def mayRiposte(dexterity,attack,defense):
 		return True
 	else:
 		return False
+##
+########
 
 #### defining more complicated functions that involve queries
 # Creates a player with the name of the user who called it, and random stats
 @module.commands('createplayer')
 def createPlayer(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if doesExist(trigger.nick):
 		bot.reply('\00313Your player already exists!')
 	else:
@@ -275,13 +347,16 @@ def createPlayer(bot, trigger):
 		dex = random.randint(minDex,maxDex)
 		# ID (auto generated), Active, Name, Attack, Defense, MaxHP, Current HP, boosts, used boosts, rerolls, used rerolls
 		cur.execute('INSERT INTO players VALUES(NULL,0,\'%s\',%s,%s,%s,%s,%s,%s,0,0,0,0,NULL,\'healthy\')' % (trigger.nick,att,defense,strength,dex,hp,hp))
-		bot.reply('\00313Your character is created! Your max hp is %s, you have %s attack dice and %s defense dice, you have %s strength dice and %s dexterity dice, and you are listed as player %s. Game on!' % (hp,att,defense,strength,dex,getID(trigger.nick)))
+		cur.execute('SELECT LAST_INSERT_ID()')
+		newID = cur.fetchone()[0]
+		cur.execute('INSERT INTO inventory VALUES(%s,null,null,null,null,null,null,null,null,null)' % newID)
+		bot.reply('\00313Your character is created! Your max hp is %s, you have %s attack dice and %s defense dice, you have %s strength dice and %s dexterity dice, and you are listed as player %s. Game on!' % (hp,att,defense,strength,dex,getPlayerID(trigger.nick)))
 		db.commit()
 
 # Check Stats
 @module.commands('stats')
 def getStats(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not trigger.group(2):
 		if not doesExist(trigger.nick):
 			bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
@@ -294,7 +369,7 @@ def getStats(bot, trigger):
 			cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
 			results = cur.fetchone()
 			if results:
-				if results[0]==getID(trigger.nick):
+				if results[0]==getPlayerID(trigger.nick):
 					opponent = getName(results[1])
 					if results[2]:
 						bot.reply('\00313You are currently in a duel with %s.' % opponent)
@@ -308,6 +383,34 @@ def getStats(bot, trigger):
 						bot.reply('\00313%s is currently awaiting your acceptance of their challenge.' % opponent)
 			else:
 				bot.reply('\00313You are not currently in, or waiting on, a duel.')
+			items = list(getInventory(getPlayerID(trigger.nick)))
+			items.pop(0)
+			isNaked = True
+			for x in items:
+				if x:
+					isNaked = False
+			if isNaked:
+				bot.reply('\00313You are naked!')
+			else:
+				wearing = ''
+				extendedInventory = items.pop(8).split()
+				for x in items:
+					if x and wearing:
+						wearing = wearing + ', ' + getItemName(x)
+					elif x:
+						wearing = getItemName(x)
+				if wearing:
+					bot.reply('\00313You are currently wearing/wielding the following:')
+					bot.reply('\00313%s' % wearing)
+				holding = ''
+				for x in extendedInventory:
+					if x and holding:
+						holding = holding + ', ' + getItemName(getExistID(x))
+					elif x:
+						holding = getItemName(getExistID(x))
+				if holding:
+					bot.reply('\00313You are currently holding the following:')
+					bot.reply('\00313%s' % holding)
 	else:
 		if not doesExist(trigger.group(2)):
 			bot.reply('\00313Sorry, %s isn\'t an existing player.' % trigger.group(2))
@@ -321,7 +424,7 @@ def getStats(bot, trigger):
 			cur.execute('SELECT * FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.group(2)),))
 			results = cur.fetchone()
 			if results:
-				if results[0]==getID(trigger.group(2)):
+				if results[0]==getPlayerID(trigger.group(2)):
 					opponent = getName(results[1])
 					if opponent==trigger.nick:
 						opponent = 'you'
@@ -348,7 +451,7 @@ def getStats(bot, trigger):
 # Quick stats
 @module.commands('qstats')
 def getQuickStats(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -363,21 +466,21 @@ def getQuickStats(bot, trigger):
 # Quick HP for you or another player
 @module.commands('qhp')
 def getQuickHP(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if trigger.group(2):
 		if not doesExist(trigger.group(2)):
 			bot.reply('\00313There is no player called %s.' % trigger.group(2))
 		else:
-			bot.reply('\00313%s\'s HP: %s/%s' % (trigger.group(2),getCurHP(getID(trigger.group(2))),getMaxHP(getID(trigger.group(2)))))
+			bot.reply('\00313%s\'s HP: %s/%s' % (trigger.group(2),getCurHP(getPlayerID(trigger.group(2))),getMaxHP(getPlayerID(trigger.group(2)))))
 	elif not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
-		bot.reply('\00313Your HP: %s/%s' % (getCurHP(getID(trigger.nick)),getMaxHP(getID(trigger.nick))))
+		bot.reply('\00313Your HP: %s/%s' % (getCurHP(getPlayerID(trigger.nick)),getMaxHP(getPlayerID(trigger.nick))))
 
 # List of Players
 @module.commands('players')
 def getPlayers(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	cur.execute('SELECT name FROM players')
 	results = cur.fetchall()
 	if not results:
@@ -391,10 +494,10 @@ def getPlayers(bot, trigger):
 @module.commands('reroll')
 def rerollStats(bot, trigger):
 	random.seed(time.time())
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getRerolls(getID(trigger.nick)) < 1:
+	elif getRerolls(getPlayerID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat rerolls remaining!')
 	else:
 		# generate new stats based on variables set above
@@ -405,40 +508,40 @@ def rerollStats(bot, trigger):
 		dex = random.randint(minDex,maxDex)
 		# remove one reroll and increment the UsedRerolls stat
 		cur.execute('UPDATE players SET attack=%s,defense=%s,strength=%s,dexterity=%s,maxhp=%s,curhp=%s,rerolls=rerolls-1,used_rerolls=used_rerolls+1 WHERE name=\'%s\'' % (att,defense,strength,dex,hp,hp,trigger.nick))
-		bot.reply('\00313You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(getID(trigger.nick)),getUsedRerolls(getID(trigger.nick))))
+		bot.reply('\00313You have used one reroll and have %s remaining. You have used %s reroll(s) total.' % (getRerolls(getPlayerID(trigger.nick)),getUsedRerolls(getPlayerID(trigger.nick))))
 		bot.reply('\00313Your new stats are: Attack - %s, Defense - %s, Strength - %s, Dexterity - %s, Max HP - %s. Game on!' % (att,defense,strength,dex,hp))
 		db.commit()
 
 # Boost a stat
 @module.commands('boost')
 def boostStat(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if trigger.group(2):
 		stat = trigger.group(2).lower()
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getBoosts(getID(trigger.nick)) < 1:
+	elif getBoosts(getPlayerID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any stat boosts remaining!')
 	elif not trigger.group(2):
 		bot.reply('\00313You need to pick a stat to .boost! Att(ack), Def(ense), Dex(terity), Str(ength) and HP (Health) are your options.')
 	elif (stat=='attack' or stat=='defense' or stat=='hp' or stat=='strength' or stat=='dexterity' or stat=='dex' or stat=='str' or stat=='att' or stat=='def' or stat=='health'):
 		if stat=='attack' or stat=='att':
 			cur.execute('UPDATE players SET attack=attack+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(getID(trigger.nick))))
+			bot.reply('\00313Your Attack stat has been increased by %s, for a total of %s.' % (boostVal,getAtt(getPlayerID(trigger.nick))))
 		elif stat=='defense' or stat=='def':
 			cur.execute('UPDATE players SET defense=defense+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(getID(trigger.nick))))
+			bot.reply('\00313Your Defense stat has been increased by %s, for a total of %s.' % (boostVal,getDef(getPlayerID(trigger.nick))))
 		elif stat=='strength' or stat=='str':
 			cur.execute('UPDATE players SET strength=strength+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(getID(trigger.nick))))
+			bot.reply('\00313Your Strength stat has been increased by %s, for a total of %s.' % (boostVal,getStr(getPlayerID(trigger.nick))))
 		elif stat=='dexterity' or stat=='dex':
 			cur.execute('UPDATE players SET dexterity=dexterity+%s WHERE name=\'%s\'' % (boostVal,trigger.nick))
-			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(getID(trigger.nick))))
+			bot.reply('\00313Your Dexterity stat has been increased by %s, for a total of %s.' % (boostVal,getDex(getPlayerID(trigger.nick))))
 		else:
 			cur.execute('UPDATE players SET maxhp=maxhp+%s,curhp=curhp+%s WHERE name=\'%s\'' % (boostVal*hpBoostMod,boostVal*hpBoostMod,trigger.nick))
-			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal*hpBoostMod,getMaxHP(getID(trigger.nick))))
+			bot.reply('\00313Your Max HP has been increased by %s, for a total of %s.' % (boostVal*hpBoostMod,getMaxHP(getPlayerID(trigger.nick))))
 		cur.execute('UPDATE players SET boosts=boosts-1,used_boosts=used_boosts+1 WHERE name=\'%s\'' % trigger.nick)
-		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(getID(trigger.nick)),getUsedBoosts(getID(trigger.nick))))
+		bot.reply('\00313You have used one stat boost and have %s remaining. You have used %s stat boost(s) total.' % (getBoosts(getPlayerID(trigger.nick)),getUsedBoosts(getPlayerID(trigger.nick))))
 		db.commit()
 	else:
 		bot.reply('\00313Sorry, \'%s\' isn\'t a stat I know of. Try again?' % stat)
@@ -446,21 +549,21 @@ def boostStat(bot, trigger):
 # Trade a reroll for a number of stat points
 @module.commands('trade')
 def tradeReroll(bot, trigger): 
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
-	elif getRerolls(getID(trigger.nick)) < 1:
+	elif getRerolls(getPlayerID(trigger.nick)) < 1:
 		bot.reply('\00313You don\'t have any rerolls to trade!')
 	else:
 		cur.execute('UPDATE players SET rerolls=rerolls-1,boosts=boosts+%s WHERE name=\'%s\'' % (rollBoostRate,trigger.nick))
-		bot.reply('\00313You now have one fewer reroll, a total of %s remaining.' % getRerolls(getID(trigger.nick)))
-		bot.reply('\00313You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(getID(trigger.nick))))
+		bot.reply('\00313You now have one fewer reroll, a total of %s remaining.' % getRerolls(getPlayerID(trigger.nick)))
+		bot.reply('\00313You now have %s additional stat boost(s), for a total of %s.' % (rollBoostRate,getBoosts(getPlayerID(trigger.nick))))
 		db.commit()
 
 # Challenges another player to a duel
 @module.commands('challenge')
 def challengePlayer(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	elif not doesExist(trigger.group(2)):
@@ -472,19 +575,19 @@ def challengePlayer(bot, trigger):
 		cur.execute('SELECT * FROM players WHERE name=%s AND currentduel IS NOT NULL', (trigger.nick,))
 		activeDuel = cur.fetchone()
 		# check to see if the player is already waiting for a response
-		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getID(trigger.nick))
+		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getPlayerID(trigger.nick))
 		youChallenging = cur.fetchone()
 		# check to see if the player is being waited on for a response
-		cur.execute('SELECT * FROM duels WHERE Defender=%s AND accepted=false;' % getID(trigger.nick))
+		cur.execute('SELECT * FROM duels WHERE Defender=%s AND accepted=false;' % getPlayerID(trigger.nick))
 		youWaiting = cur.fetchone()
 		# check to see if the challenged has any active duels
 		cur.execute('SELECT * FROM players WHERE name=%s AND currentduel IS NOT NULL', (trigger.group(2),))
 		themActive = cur.fetchone()
 		# check to see if the challenged is waiting on a response
-		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getID(trigger.group(2)))
+		cur.execute('SELECT * FROM duels WHERE Challenger=%s AND accepted=false;' % getPlayerID(trigger.group(2)))
 		themChallenging = cur.fetchone()
 		# check to see if the challenged is being waited on for a response
-		cur.execute('SELECT * FROM duels WHERE Defender=%s AND accepted=false;' % getID(trigger.nick))
+		cur.execute('SELECT * FROM duels WHERE Defender=%s AND accepted=false;' % getPlayerID(trigger.nick))
 		themWaiting = cur.fetchone()
 		##
 		if activeDuel:
@@ -501,22 +604,22 @@ def challengePlayer(bot, trigger):
 			bot.reply('\00313%s has been challenged by %s for a duel and cannot accept duels at this time.' % ((trigger.group(2),themWaiting[0])))
 		else:
 			# creates the duel data 
-			chaTot = getMaxHP(getID(trigger.nick)) + getAtt(getID(trigger.nick)) + getDef(getID(trigger.nick)) + getStr(getID(trigger.nick)) + getDex(getID(trigger.nick))
-			defTot = getMaxHP(getID(trigger.group(2))) + getAtt(getID(trigger.group(2))) + getDef(getID(trigger.group(2))) + getStr(getID(trigger.group(2))) + getDex(getID(trigger.group(2)))
+			chaTot = getMaxHP(getPlayerID(trigger.nick)) + getAtt(getPlayerID(trigger.nick)) + getDef(getPlayerID(trigger.nick)) + getStr(getPlayerID(trigger.nick)) + getDex(getPlayerID(trigger.nick))
+			defTot = getMaxHP(getPlayerID(trigger.group(2))) + getAtt(getPlayerID(trigger.group(2))) + getDef(getPlayerID(trigger.group(2))) + getStr(getPlayerID(trigger.group(2))) + getDex(getPlayerID(trigger.group(2)))
 			if chaTot > defTot:
 				favour = trigger.nick
 			elif defTot > chaTot:
 				favour = trigger.group(2)
 			duelID = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
-			cur.execute('INSERT INTO duels VALUES(%s,%s,false,%s,NULL,false,%s,%s,1,0,0);', (getID(trigger.nick), getID(trigger.group(2)),getID(favour),getID(trigger.group(2)),duelID))
-			cur.execute('UPDATE players SET currentduel=%s WHERE id=%s OR id=%s', (duelID,getID(trigger.nick),getID(trigger.group(2))))
+			cur.execute('INSERT INTO duels VALUES(%s,%s,false,%s,NULL,false,%s,%s,1,0,0);', (getPlayerID(trigger.nick), getPlayerID(trigger.group(2)),getPlayerID(favour),getPlayerID(trigger.group(2)),duelID))
+			cur.execute('UPDATE players SET currentduel=%s WHERE id=%s OR id=%s', (duelID,getPlayerID(trigger.nick),getPlayerID(trigger.group(2))))
 			bot.say('\00313%s: You are officially challenged to a duel by %s! Say \'.accept\' to begin the battle!' % (trigger.group(2),trigger.nick))
 			db.commit()
 
 # Accepts a duel from another player
 @module.commands('accept')
 def acceptChallenge(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -526,7 +629,7 @@ def acceptChallenge(bot, trigger):
 			bot.reply('\00313You don\'t have any waiting challenges, I\'m afraid. Issue one with \'.challenge <name>\'!')
 		elif waiting[5]==1:
 			bot.reply('\00313Your duel is already underway!')
-		elif waiting[0]==getID(trigger.nick):
+		elif waiting[0]==getPlayerID(trigger.nick):
 			bot.reply('\00313You can\'t accept your own invitation! You fool!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
@@ -542,7 +645,7 @@ def acceptChallenge(bot, trigger):
 # Rejects a duel from another player
 @module.commands('reject','decline','pansyout')
 def rejectChallenge(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -550,23 +653,23 @@ def rejectChallenge(bot, trigger):
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges to reject. Issue one with \'.challenge <name>\'!')
-		elif waiting[5]==1 and waiting[1]==getID(trigger.nick):
+		elif waiting[5]==1 and waiting[1]==getPlayerID(trigger.nick):
 			bot.reply('\00313Too late, you already accepted it! .forfeit if you don\'t want to keep fighting!')
 		elif waiting[5]==1:
 			bot.reply('\00313Too late, it\'s already been accepted! Not that you can reject your own duels anyway!')
-		elif waiting[0]==getID(trigger.nick):
+		elif waiting[0]==getPlayerID(trigger.nick):
 			bot.reply('\00313you can\'t reject your own duel! You goon!')
 		else:
 			# Updates the duel once it's confirmed to be valid to be active
 			cur.execute('DELETE FROM duels WHERE duelid=%s', (getCurrentDuel(trigger.nick),))
-			cur.execute('UPDATE players SET currentduel=NULL WHERE id=%s OR id=%s', (getID(trigger.nick),waiting[0]))
+			cur.execute('UPDATE players SET currentduel=NULL WHERE id=%s OR id=%s', (getPlayerID(trigger.nick),waiting[0]))
 			bot.say('\00313%s: %s has rejected your duel! "%s", they said!' % (getName(waiting[0]),trigger.nick,trigger.group(2)))
 			db.commit()
 
 # Retracts a waiting challenge
 @module.commands('retract','maybenot')
 def retractChallenge(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not  doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -574,11 +677,11 @@ def retractChallenge(bot, trigger):
 		waiting = cur.fetchone()
 		if not waiting:
 			bot.reply('\00313You don\'t have any waiting challenges to retract. Issue one with \'.challenge <name>\'!')
-		elif waiting[5]==1 and waiting[0]==getID(trigger.nick):
+		elif waiting[5]==1 and waiting[0]==getPlayerID(trigger.nick):
 			bot.reply('\00313Too late, it\'s already been accepted! .forfeit if you don\'t feel like fighting anymore!')
 		elif waiting[5]==1:
 			bot.reply('\00313Too late, you alread accepted this duel! You can\'t retract someone else\'s duel anyway!')
-		elif waiting[1]==getID(trigger.nick):
+		elif waiting[1]==getPlayerID(trigger.nick):
 			bot.reply('\00313You can\'t retract someone else\'s duel!')
 		else:
 			# Updates the duel once it's confirmed to be a valid request
@@ -591,28 +694,28 @@ def retractChallenge(bot, trigger):
 @module.commands('attack','attack!')
 def attackDuel(bot, trigger):
 	random.seed(time.time())
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		# determine if the player is actually in a duel or not
-		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getID(trigger.nick),getID(trigger.nick)))
+		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getPlayerID(trigger.nick),getPlayerID(trigger.nick)))
 		duelResults = cur.fetchone()
 		if not duelResults:
-			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getID(trigger.nick))
+			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getPlayerID(trigger.nick))
 			cha = cur.fetchone()
 			if(cha):
 				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % getName(cha[0]))
 			else:
 				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
-		elif not (duelResults[6]==getID(trigger.nick)):
+		elif not (duelResults[6]==getPlayerID(trigger.nick)):
 			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % getName(duelResults[6]))
 		elif duelResults[8]==2:
 			bot.reply('\00313It\'s your turn to .defend, not attack!')
 		else:
 			# set the opponent
-			if duelResults[0]==getID(trigger.nick):
+			if duelResults[0]==getPlayerID(trigger.nick):
 				opponent = duelResults[1]
 			else:
 				opponent = duelResults[0]
@@ -621,7 +724,7 @@ def attackDuel(bot, trigger):
 				rolls = "To hit: "
 				hits = 0
 				# this loop rolls a number of dice equal to the attacker's Att stat
-				for x in range (0,getAtt(getID(trigger.nick))):
+				for x in range (0,getAtt(getPlayerID(trigger.nick))):
 					# rolls a hitDie-sided die, specified above
 					tRoll = random.randint(1,hitDie)
 					rolls = rolls + str(tRoll) + ', '
@@ -642,7 +745,7 @@ def attackDuel(bot, trigger):
 				# determine Strength hits
 				spRolls = "Strength roll: "
 				spHits = 0
-				for x in range (0,getStr(getID(trigger.nick))):
+				for x in range (0,getStr(getPlayerID(trigger.nick))):
 					# rolls a strDie-sided die, specified above
 					tRoll = random.randint(1,strDie)
 					spRolls = spRolls + str(tRoll) + ', '
@@ -707,12 +810,12 @@ def attackDuel(bot, trigger):
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
-					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
+					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getPlayerID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant additional points if the favour bonus is in effect
-					if duelResults[3]!=getID(trigger.nick) and favourPoints:
+					if duelResults[3]!=getPlayerID(trigger.nick) and favourPoints:
 						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
 						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
@@ -765,12 +868,12 @@ def attackDuel(bot, trigger):
 				# if the opponent has less current HP than the damage done (or the same amount), they lose! process the final results
 				elif getCurHP(opponent) < (hits + 1):
 					# set winner to the player, set active duel to false
-					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getID(trigger.nick),getCurrentDuel(trigger.nick))) 
+					cur.execute('UPDATE duels SET winner=%s,active=false WHERE duelid=%s', (getPlayerID(trigger.nick),getCurrentDuel(trigger.nick))) 
 					# grant the winner their boost(s) and set HP to max
 					cur.execute('UPDATE players SET boosts=boosts+%s,curhp=maxhp,currentduel=NULL,status=\'healthy\' WHERE name=\'%s\'' % (winBoosts,trigger.nick))
 					bot.reply('\00313You are the winner of the duel against *%s*! You have gained *%s* stat point(s) for your victory!' % (getName(opponent),winBoosts))
 					# grant additional points if the favour bonus is in effect
-					if duelResults[3]!=getID(trigger.nick) and favourPoints:
+					if duelResults[3]!=getPlayerID(trigger.nick) and favourPoints:
 						cur.execute('UPDATE players SET boosts=boosts+%s WHERE name=\'%s\'' % (favourBoosts,trigger.nick))
 						bot.reply('\00313As your opponent was favoured against you, you also gain an additional %s stat point(s)!' % favourBoosts)
 					# grant the loser a reroll and set his HP to max
@@ -792,34 +895,34 @@ def attackDuel(bot, trigger):
 @module.commands('defend')
 def defendDuel(bot, trigger):
 	random.seed(time.time())
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
 		# determine if the player is actually in a duel or not
-		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getID(trigger.nick),getID(trigger.nick)))
+		cur.execute('SELECT * FROM duels WHERE (defender=%s OR challenger=%s) AND active=true' % (getPlayerID(trigger.nick),getPlayerID(trigger.nick)))
 		duelResults = cur.fetchone()
 		if not duelResults:
-			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getID(trigger.nick))
+			cur.execute('SELECT challenger FROM duels WHERE defender=%s AND active=false AND accepted=false' % getPlayerID(trigger.nick))
 			cha = cur.fetchone()
 			if(cha):
 				bot.reply('\00313You have a waiting request from %s! You have to .accept their challenge first!' % cha[0])
 			else:
 				bot.reply('\00313You are not currently in a duel! Go .challenge someone!')
 		# test to see if it's the player's turn
-		elif not (duelResults[6]==getID(trigger.nick)):
+		elif not (duelResults[6]==getPlayerID(trigger.nick)):
 			bot.reply('\00313Wait your turn, it\'s %s\'s turn!' % getName(duelResults[6]))
 		elif duelResults[8]==1 or duelResults[8]==3 or duelResults[8]==4:
 			bot.reply('\00313It\'s your turn to .attack, not defend!')
 		elif duelResults[8]==2:
 			rolls = "\00313Defense roll: "
 			hits = 0
-			if duelResults[0]==getID(trigger.nick):
+			if duelResults[0]==getPlayerID(trigger.nick):
 				opponent = duelResults[1]
 			else:
 				opponent = duelResults[0]
 			# this loop rolls dice equal to the player's defense stat
-			for x in range (0,getDef(getID(trigger.nick))):
+			for x in range (0,getDef(getPlayerID(trigger.nick))):
 				# rolls a defDie-sided die, specified above
 				tRoll = random.randint(1,defDie)
 				rolls = rolls + str(tRoll) + ', '
@@ -841,8 +944,8 @@ def defendDuel(bot, trigger):
 			spHits = 0
 			if DEBUG:
 				bot.reply('These are the stats we are working with:')
-				bot.reply('%s is dex of player, %s is dexDie, %s is DexThr, %s is dubDex, %s is duDxTh, %s is negDex, and %s is neDxTh' % (getDex(getID(trigger.nick)),dexDie,dexThr,dubDex,duDxTh,negDex,neDxTh))
-			for x in range (0,getDex(getID(trigger.nick))):
+				bot.reply('%s is dex of player, %s is dexDie, %s is DexThr, %s is dubDex, %s is duDxTh, %s is negDex, and %s is neDxTh' % (getDex(getPlayerID(trigger.nick)),dexDie,dexThr,dubDex,duDxTh,negDex,neDxTh))
+			for x in range (0,getDex(getPlayerID(trigger.nick))):
 				tRoll = random.randint(1,dexDie)
 				spRolls = spRolls + str(tRoll) + ', '
 				# do i really need to say it?
@@ -894,7 +997,7 @@ def defendDuel(bot, trigger):
 					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.' % (trigger.nick,spHits,getName(opponent),duelResults[10]))
 				if hits < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=3,dice=%s,specialdice=0 WHERE duelid=%s', (opponent,newDice,getCurrentDuel(trigger.nick)))
-					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % getID(trigger.nick))
+					cur.execute('UPDATE players SET status=\'stunned\' WHERE id=%s' % getPlayerID(trigger.nick))
 					bot.reply('\00313Too bad! Unfortunately, %s\'s blow manages to stun you! The turn passes to them for damage!' % getName(opponent))
 				elif newDice < 1:
 					cur.execute('UPDATE duels SET turn=%s,stage=1,dice=0,specialdice=0 WHERE duelid=%s', (opponent,getCurrentDuel(trigger.nick)))
@@ -933,7 +1036,7 @@ def defendDuel(bot, trigger):
 # The forfeit command!
 @module.commands('forfeit')
 def forfeitDuel(bot, trigger):
-	testDB(db,cur)
+	#testDB(db,cur)
 	if not doesExist(trigger.nick):
 		bot.reply('\00313Your player needs to exist first! Say \'.createplayer\' to get started.')
 	else:
@@ -942,7 +1045,7 @@ def forfeitDuel(bot, trigger):
 		if not duelResults:
 			bot.reply('\00313You are not currently in a duel! Go .challenge someone before giving up!')
 		else:
-			if duelResults[0]==getID(trigger.nick):
+			if duelResults[0]==getPlayerID(trigger.nick):
 				opponent = duelResults[1]
 			else:
 				opponent = duelResults[0]
@@ -956,6 +1059,148 @@ def forfeitDuel(bot, trigger):
 			bot.say('\00313The duel between %s and %s has officially ended. The winner was %s! Both of them have been healed back to max. See you next time!' % (getName(duelResults[0]),getName(duelResults[1]),getName(opponent)))
 			db.commit()
 
+#######################
+## EQUIPMENT FUNCTIONS
+#######################
+# Show equipped gear
+@module.commands('equipped')
+def getEquipped(bot, trigger):
+	if not doesExist(trigger.nick):
+		bot.reply('\00313You need to .createplayer first!')
+	else:
+		results = list(getInventory(getPlayerID(trigger.nick)))
+		results.pop(0)
+		results.pop(8)
+		naked = True
+		for x in results:
+			if x:
+				naked = False
+		if naked:
+			bot.reply('\00313You are naked!!!!')
+		else:
+			if results[0]:
+				bot.reply('\00313Head: %s' % getItemName(getExistID(results[0])))
+			if results[1]:
+				bot.reply('\00313Shoulders: %s' % getItemName(getExistID(results[1])))
+			if results[2]:
+				bot.reply('\00313Hands: %s' % getItemName(getExistID(results[2])))
+			if results[3]:
+				bot.reply('\00313Legs: %s' % getItemName(getExistID(results[3])))
+			if results[4]:
+				bot.reply('\00313Feet: %s' % getItemName(getExistID(results[4])))
+			if results[5]:
+				bot.reply('\00313Back: %s' % getItemName(getExistID(results[5])))
+			if results[6] and results[6]==results[7]:
+				bot.reply('\00313Main and off hand: %s' % getItemName(getExistID(results[6])))
+			else:
+				if results[6]:
+					bot.reply('\00313Main Hand: %s' % getItemName(getExistID(results[6])))
+				if results[7]:
+					bot.reply('\00313Head: %s' % getItemName(getExistID(results[7])))
+
+# show held items, i.e. in the Other column in the inventory table
+@module.commands('inventory')
+def getMyInventory(bot, trigger):
+	if not doesExist(trigger.nick):
+		bot.reply('\00313You need to .createplayer first!')
+	else:
+		results = getInventory(getPlayerID(trigger.nick))[9].split()
+		if not results:
+			bot.reply('\00313You are not holding anything.')
+		else:
+			holding = ''
+			for x in results:
+				if holding:
+					holding = holding + ', ' + str(x) + ' -- ' + getItemName(getExistID(x))
+				else:
+					holding = str(x) + ' -- ' + getItemName(getExistID(x))
+			bot.reply('\00313You have, in your inventory, the following items:')
+			bot.reply('\00313%s' % holding)
+
+# TODO: THE BIG ONE TODO
+# Equip an item from inventory
+@module.commands('equip')
+def equipItem(bot, trigger):
+	if not doesExist(trigger.nick):
+		bot.reply('\00313You need to .createplayer first.')
+	else:
+		PID = getPlayerID(trigger.nick)
+		rest = trigger.group(2)
+		if not rest:
+			bot.reply('\00313You need to specify what you want to equip. Check your .inventory to see your item IDs.')
+		else:
+			rest = rest.split()
+			if getItemType(rest[0])=='weapon' and not len(rest)==2 and not getWeaponHand(rest[0])=='both':
+				bot.reply('\00313You need to specify which hand the weapon is going to, as in \'.equip # HAND\', where # is the item ID and HAND is \'main\' or \'off\'.')
+			else:
+				if getItemType(rest[0]) == weapon:
+					## TODO!!!! KEEP WORKING ON EQUIP FUNCTION!!!! TODO
+
+# Unequip a slot
+@module.commands('unequip')
+def unequipItem(bot, trigger):
+	if not doesExist(trigger.nick):
+		bot.reply('\00313You need to .createplayer first.')
+	elif not trigger.group(2):
+		bot.reply('\00313You need to specify which slot you want to unequip.')
+	else:
+		PID = getPlayerID(trigger.nick)
+		inventory = list(getInventory(PID))
+		inventory.pop(0)
+		inventory.pop(8)
+		naked = True
+		for x in inventory:
+			if x:
+				naked = False
+		if naked:
+			bot.reply('\00313You\'re naked!')
+		else:
+			slot = trigger.group(2)
+			if slot == 'head' and inventory[0]:
+				thing = inventory[0]
+				addToInventory(PID,inventory[0])
+				cur.execute('UPDATE inventory SET Head=null WHERE ID=%d' % PID)
+			elif slot == 'shoulders' and inventory[1]:
+				thing = inventory[1]
+				addToInventory(PID,inventory[1])
+				cur.execute('UPDATE inventory SET Shoulders=null WHERE ID=%d' % PID)
+			elif slot == 'hands' and inventory[2]:
+				thing = inventory[2]
+				addToInventory(PID,inventory[2])
+				cur.execute('UPDATE inventory SET Hands=null WHERE ID=%d' % PID)
+			elif slot == 'legs' and inventory[3]:
+				thing = inventory[3]
+				addToInventory(PID,inventory[3])
+				cur.execute('UPDATE inventory SET Legs=null WHERE ID=%d' % PID)
+			elif slot == 'feet' and inventory[4]:
+				thing = inventory[4]
+				addToInventory(PID,inventory[4])
+				cur.execute('UPDATE inventory SET Feet=null WHERE ID=%d' % PID)
+			elif slot == 'back' and inventory[5]:
+				thing = inventory[5]
+				addToInventory(PID,inventory[5])
+				cur.execute('UPDATE inventory SET Back=null WHERE ID=%d' % PID)
+			elif slot == 'main' and inventory[6] and inventory[6]==inventory[7]:
+				thing = inventory[6]
+				addToInventory(PID,inventory[6])
+				cur.execute('UPDATE inventory SET MainHand=null,OffHand=null WHERE ID=%d' % PID)
+			elif slot == 'main' and inventory[6]:
+				thing = inventory[6]
+				addToInventory(PID,inventory[6])
+				cur.execute('UPDATE inventory SET MainHand=null WHERE ID=%d' % PID)
+			elif slot == 'off' and inventory[7]:
+				thing = inventory[7]
+				addToInventory(PID,inventory[7])
+				cur.execute('UPDATE inventory SET OffHand=null WHERE ID=%d' % PID)
+			else:
+				bot.reply('\00313You have nothing equipped in slot %s.' % slot)
+				return
+			bot.reply('\00313Your %s has been unequipped and returned to your inventory.' % getItemName(getExistID(thing)))
+			db.commit()
+
+####################################
+#### DEBUGGING AND ADMIN FUNCTIONS
+####################################
 # override the help command
 @module.commands('help')
 def help(bot, trigger):
@@ -974,6 +1219,83 @@ def runDebug(bot, trigger):
 			bot.reply('You aren\'t allowed to run this command.')
 		elif trigger.group(2)=='commit':
 			db.commit()
+			bot.reply('Successful commit.')
+		elif trigger.group(2)=='selftest':
+			cur.execute('INSERT INTO duels (%s,%s,true,0,NULL,true,%s,%s,1,0,0)', (getPlayerID(trigger.nick),getPlayerID(trigger.nick),getPlayerID(trigger.nick),'loltesting'))
+			bot.reply('Self-test duel created.')
 		else:
 			cur.execute(trigger.group(2))
 			bot.reply('Query was successful.')
+
+# FOR ADMIN ADDITIONS, NOT USING DEBUG. EASE OF USE?
+@module.commands('admin')
+def runAdmin(bot, trigger):
+	if ADMIN_CONTROL:
+		canAdmin = False
+		for x in ADMINS:
+			if trigger.nick == x:
+				canAdmin = True
+		if not canAdmin:
+			bot.reply('You aren\'t allowed to run this command.')
+		else:
+			com = trigger.group(2).split()
+			cSize = len(com)
+			# the list command.
+			if com[0].lower() == 'list':
+				# make sure that something has actually been chosen
+				if cSize > 1:
+					# listing all defined items
+					if com[1].lower() == 'items':
+						cur.execute('SELECT Name FROM item_definitions')
+						results = cur.fetchall()
+						if results:
+							for name in results:
+								bot.reply('\00313%s' % name)
+						else:
+							bot.reply('No item definitions.')
+					# listing all duel data
+					elif com[1].lower() == 'duels':
+						cur.execute('SELECT * FROM duels')
+						results = cur.fetchall()
+						if results:
+							for duel in results:
+								isActive = 'inactive'
+								if results[2]:
+									isActive = 'active'
+								bot.reply('\00313%s vs %s, %s' % (getName(results[0]),getName(results[1]),isActive))
+						else:
+							bot.reply('No duel data.')
+					else:
+						bot.reply('No list called \'%s\'.' % com[1])
+				else:
+					bot.reply('Need to specify a target for command \'list\'.')
+			elif com[0].lower() == 'give':
+				# make sure that something has been chosen and a player has been selected
+				if cSize > 2:
+					# making sure the player exists
+					if doesExist(com[1]):
+						player = com.pop(1)
+						com.pop(0)
+						newItem = ' '.join(com)
+						# making sure the item exists 
+						if doesItemExist(newItem):
+							cur.execute('INSERT INTO items VALUES(NULL,%d,%d,\'new\')' % (getItemID(newItem),getPlayerID(player)))
+							cur.execute('SELECT LAST_INSERT_ID()')
+							newID = cur.fetchone()[0]
+							cur.execute('SELECT Inventory FROM inventory WHERE ID=%d' % getPlayerID(player))
+							inventory = cur.fetchone()[0]
+							if inventory:
+								inventory = inventory + ' ' + str(newID)
+							else:
+								inventory = str(newID)
+							cur.execute('UPDATE inventory SET Inventory=%s WHERE ID=%s', (inventory,getPlayerID(player)))
+							bot.reply('\00313%s created and given to %s.' % (newItem,player))
+							db.commit()
+						else:
+							bot.reply('\00313That is not an existing item.')
+					else:
+						bot.reply('\00313That is not an existing player.')
+				else:
+					bot.repl('\00313You need to specify what to give.')
+			else:
+				bot.reply('No command called \'%s\'.' % com[0])

@@ -16,6 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `active_effects`
+--
+
+DROP TABLE IF EXISTS `active_effects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `active_effects` (
+  `Name` varchar(40) DEFAULT NULL,
+  `EffectID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Scope` varchar(40) DEFAULT NULL,
+  `Type` varchar(40) DEFAULT NULL,
+  `Details` varchar(255) DEFAULT NULL,
+  `Cooldown` int(10) unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`EffectID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `active_effects`
+--
+
+LOCK TABLES `active_effects` WRITE;
+/*!40000 ALTER TABLE `active_effects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `active_effects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `armour_definitions`
 --
 
@@ -46,6 +73,7 @@ CREATE TABLE `armour_definitions` (
 
 LOCK TABLES `armour_definitions` WRITE;
 /*!40000 ALTER TABLE `armour_definitions` DISABLE KEYS */;
+INSERT INTO `armour_definitions` VALUES (2,'head',1,2,3);
 /*!40000 ALTER TABLE `armour_definitions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,8 +90,12 @@ CREATE TABLE `armour_parts` (
   `ActiveEffect` int(10) unsigned DEFAULT NULL,
   `Word` varchar(40) DEFAULT NULL,
   `PartType` varchar(40) DEFAULT NULL,
-  PRIMARY KEY (`PartID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`PartID`),
+  KEY `PassiveEffect` (`PassiveEffect`),
+  KEY `ActiveEffect` (`ActiveEffect`),
+  CONSTRAINT `armour_parts_ibfk_2` FOREIGN KEY (`ActiveEffect`) REFERENCES `active_effects` (`EffectID`),
+  CONSTRAINT `armour_parts_ibfk_1` FOREIGN KEY (`PassiveEffect`) REFERENCES `passive_effects` (`EffectID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,6 +104,7 @@ CREATE TABLE `armour_parts` (
 
 LOCK TABLES `armour_parts` WRITE;
 /*!40000 ALTER TABLE `armour_parts` DISABLE KEYS */;
+INSERT INTO `armour_parts` VALUES (1,2,NULL,'Sluggish','Comb'),(2,2,NULL,'Sluggish','Visor'),(3,2,NULL,'Slugs','Helm');
 /*!40000 ALTER TABLE `armour_parts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -132,6 +165,55 @@ LOCK TABLES `duels` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `inventory`
+--
+
+DROP TABLE IF EXISTS `inventory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `inventory` (
+  `ID` int(10) unsigned NOT NULL,
+  `Head` int(10) unsigned DEFAULT NULL,
+  `Shoulders` int(10) unsigned DEFAULT NULL,
+  `Hands` int(10) unsigned DEFAULT NULL,
+  `Legs` int(10) unsigned DEFAULT NULL,
+  `Feet` int(10) unsigned DEFAULT NULL,
+  `Back` int(10) unsigned DEFAULT NULL,
+  `MainHand` int(10) unsigned DEFAULT NULL,
+  `OffHand` int(10) unsigned DEFAULT NULL,
+  `Inventory` text,
+  KEY `ID` (`ID`),
+  KEY `Head` (`Head`),
+  KEY `Shoulders` (`Shoulders`),
+  KEY `Hands` (`Hands`),
+  KEY `Legs` (`Legs`),
+  KEY `Feet` (`Feet`),
+  KEY `Back` (`Back`),
+  KEY `MainHand` (`MainHand`),
+  KEY `OffHand` (`OffHand`),
+  CONSTRAINT `inventory_ibfk_9` FOREIGN KEY (`OffHand`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`ID`) REFERENCES `players` (`id`),
+  CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`Head`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_3` FOREIGN KEY (`Shoulders`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_4` FOREIGN KEY (`Hands`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_5` FOREIGN KEY (`Legs`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_6` FOREIGN KEY (`Feet`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_7` FOREIGN KEY (`Back`) REFERENCES `item_definitions` (`ItemID`),
+  CONSTRAINT `inventory_ibfk_8` FOREIGN KEY (`MainHand`) REFERENCES `item_definitions` (`ItemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inventory`
+--
+
+LOCK TABLES `inventory` WRITE;
+/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
+INSERT INTO `inventory` VALUES (1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'3 6'),(2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'4');
+/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `item_definitions`
 --
 
@@ -145,7 +227,7 @@ CREATE TABLE `item_definitions` (
   `Weight` int(11) DEFAULT NULL,
   `Value` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`ItemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -154,7 +236,7 @@ CREATE TABLE `item_definitions` (
 
 LOCK TABLES `item_definitions` WRITE;
 /*!40000 ALTER TABLE `item_definitions` DISABLE KEYS */;
-INSERT INTO `item_definitions` VALUES (1,'Firm Shield of Firm Firmness','weapon',1,5);
+INSERT INTO `item_definitions` VALUES (1,'Firm Shield of Firm Firmness','weapon',1,5),(2,'Sluggish Helm of Sluggish Slugs','armour',1,0);
 /*!40000 ALTER TABLE `item_definitions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -173,7 +255,7 @@ CREATE TABLE `items` (
   PRIMARY KEY (`ID`),
   KEY `ItemID` (`ItemID`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `item_definitions` (`ItemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -182,7 +264,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (1,1,0,'new');
+INSERT INTO `items` VALUES (3,1,1,'new'),(4,1,2,'new'),(6,2,1,'new');
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,7 +284,7 @@ CREATE TABLE `passive_effects` (
   `IsSpecial` tinyint(1) DEFAULT '0',
   `SpecialRules` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`EffectID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +293,7 @@ CREATE TABLE `passive_effects` (
 
 LOCK TABLES `passive_effects` WRITE;
 /*!40000 ALTER TABLE `passive_effects` DISABLE KEYS */;
-INSERT INTO `passive_effects` VALUES ('small def up',1,'self','def',2,0,NULL);
+INSERT INTO `passive_effects` VALUES ('small def up',1,'self','def',2,0,NULL),('small dex up',2,'self','dex',-2,0,NULL);
 /*!40000 ALTER TABLE `passive_effects` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -238,32 +320,8 @@ CREATE TABLE `players` (
   `Used_Rerolls` int(11) NOT NULL DEFAULT '0',
   `CurrentDuel` varchar(40) DEFAULT NULL,
   `Status` varchar(40) NOT NULL DEFAULT 'healthy',
-  `Head` int(10) unsigned DEFAULT NULL,
-  `Shoulders` int(10) unsigned DEFAULT NULL,
-  `Hands` int(10) unsigned DEFAULT NULL,
-  `MainHand` int(10) unsigned DEFAULT NULL,
-  `OffHand` int(10) unsigned DEFAULT NULL,
-  `Legs` int(10) unsigned DEFAULT NULL,
-  `Feet` int(10) unsigned DEFAULT NULL,
-  `Back` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `Head` (`Head`),
-  KEY `Shoulders` (`Shoulders`),
-  KEY `Hands` (`Hands`),
-  KEY `MainHand` (`MainHand`),
-  KEY `OffHand` (`OffHand`),
-  KEY `Legs` (`Legs`),
-  KEY `Feet` (`Feet`),
-  KEY `Back` (`Back`),
-  CONSTRAINT `players_ibfk_8` FOREIGN KEY (`Back`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_1` FOREIGN KEY (`Head`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_2` FOREIGN KEY (`Shoulders`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_3` FOREIGN KEY (`Hands`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_4` FOREIGN KEY (`MainHand`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_5` FOREIGN KEY (`OffHand`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_6` FOREIGN KEY (`Legs`) REFERENCES `items` (`ID`),
-  CONSTRAINT `players_ibfk_7` FOREIGN KEY (`Feet`) REFERENCES `items` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,6 +330,7 @@ CREATE TABLE `players` (
 
 LOCK TABLES `players` WRITE;
 /*!40000 ALTER TABLE `players` DISABLE KEYS */;
+INSERT INTO `players` VALUES (1,0,'jabird',3,4,5,11,2,2,0,0,0,0,NULL,'healthy'),(2,0,'chris',15,4,2,8,3,3,0,0,0,0,NULL,'healthy');
 /*!40000 ALTER TABLE `players` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -395,7 +454,11 @@ CREATE TABLE `weapon_parts` (
   `ActiveEffect` int(10) unsigned DEFAULT NULL,
   `Word` varchar(40) DEFAULT NULL,
   `PartType` varchar(40) DEFAULT NULL,
-  PRIMARY KEY (`PartID`)
+  PRIMARY KEY (`PartID`),
+  KEY `PassiveEffect` (`PassiveEffect`),
+  KEY `ActiveEffect` (`ActiveEffect`),
+  CONSTRAINT `weapon_parts_ibfk_2` FOREIGN KEY (`ActiveEffect`) REFERENCES `active_effects` (`EffectID`),
+  CONSTRAINT `weapon_parts_ibfk_1` FOREIGN KEY (`PassiveEffect`) REFERENCES `passive_effects` (`EffectID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -418,4 +481,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-12-16 19:58:05
+-- Dump completed on 2015-12-17 20:18:25
