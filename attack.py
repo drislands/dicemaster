@@ -395,34 +395,34 @@ def getStats(bot, trigger):
 						bot.reply('\00313%s is currently awaiting your acceptance of their challenge.' % opponent)
 			else:
 				bot.reply('\00313You are not currently in, or waiting on, a duel.')
-			items = list(getInventory(getPlayerID(trigger.nick)))
-			items.pop(0)
-			isNaked = True
-			for x in items:
-				if x:
-					isNaked = False
-			if isNaked:
-				bot.reply('\00313You are naked!')
-			else:
-				wearing = ''
-				extendedInventory = items.pop(8).split()
-				for x in items:
-					if x and wearing:
-						wearing = wearing + ', ' + getItemName(x)
-					elif x:
-						wearing = getItemName(x)
-				if wearing:
-					bot.reply('\00313You are currently wearing/wielding the following:')
-					bot.reply('\00313%s' % wearing)
-				holding = ''
-				for x in extendedInventory:
-					if x and holding:
-						holding = holding + ', ' + getExistName(x)
-					elif x:
-						holding = getExistName(x)
-				if holding:
-					bot.reply('\00313You are currently holding the following:')
-					bot.reply('\00313%s' % holding)
+		#	items = list(getInventory(getPlayerID(trigger.nick)))
+		#	items.pop(0)
+		#	isNaked = True
+		#	for x in items:
+		#		if x:
+		#			isNaked = False
+		#	if isNaked:
+		#		bot.reply('\00313You are naked!')
+		#	else:
+		#		wearing = ''
+		#		extendedInventory = items.pop(8).split()
+		#		for x in items:
+		#			if x and wearing:
+		#				wearing = wearing + ', ' + getItemName(x)
+		#			elif x:
+		#				wearing = getItemName(x)
+		#		if wearing:
+		#			bot.reply('\00313You are currently wearing/wielding the following:')
+		#			bot.reply('\00313%s' % wearing)
+		#		holding = ''
+		#		for x in extendedInventory:
+		#			if x and holding:
+		#				holding = holding + ', ' + getExistName(x)
+		#			elif x:
+		#				holding = getExistName(x)
+		#		if holding:
+		#			bot.reply('\00313You are currently holding the following:')
+		#			bot.reply('\00313%s' % holding)
 	else:
 		if not doesExist(trigger.group(2)):
 			bot.reply('\00313Sorry, %s isn\'t an existing player.' % trigger.group(2))
@@ -1024,7 +1024,7 @@ def defendDuel(bot, trigger):
 					riposteDice = int(((spHits + hits) / 2) - duelResults[9])
 				if showWinningRolls:
 					bot.say('\00313%s got a dex roll of %d, and %s got a str roll of %d.' % (trigger.nick,spHits,getName(opponent),duelResults[10]))
-				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was EDIT: now we're just giving you 6
+				if hits < 1: # currently we're determining riposte dice by whatever your dex roll was EDIT: now we're just giving you 6 EDITEDIT: now that depends if a variable is set, see above
 					cur.execute('UPDATE duels SET stage=4,dice=%s,specialdice=0 WHERE duelid=%s', (riposteDice,getCurrentDuel(trigger.nick)))
 					bot.reply('\00313Your....uh...armour sucks but...your weapon is fast! ...I guess.... Either way, you successfully riposte.')
 				elif newDice < 1:

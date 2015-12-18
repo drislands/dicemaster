@@ -1,0 +1,119 @@
+These are the commands you can use when dicebot/dicemaster is active:
+
+.createplayer
+ If you don't have an existing player in the database, this will create one with
+  random stats. If you have an existing player, it will tell you so and do
+  nothing.
+ No other function (except admin and debug) will work if you haven't run this
+  before.
+
+.stats [player]
+ If you don't specify a player, returns your stats: Attack, Defense, Dexterity,
+  Strength, Current and Max HP, and whether or not you are in a duel, and who
+  with.
+ If you do specify a player, returns their stats.
+
+.qstats
+ Returns your stats (not duel info) in a condensed, easy to read format.
+
+.qhp [player]
+ Returns the Current/Max HP of the player, if specified. If not, returns yours.
+
+.players
+ Returns a list of all players in the database.
+
+.reroll
+ Rerolls your base HP, Att, Def, Str, and Dex stats, if you have a Reroll to
+  spend.
+
+.boost <stat>
+ Increases <stat> by one, if you have a Boost to spend.
+
+.trade
+ Trades one of your unspent Rerolls for 2 Boosts, if you have any.
+
+.challenge <player>
+ Challenges <player> to a duel, and notifies them as such.
+ Only works if neither you nor <player> are in a duel, and <player> exists, and
+  neither of you have outstanding duel invitations.
+
+.accept
+ Accepts an outstanding duel invitation. Only works if you have an outstanding
+  duel invitation from another player.
+
+.reject,.decline,.pansyout [message]
+ Rejects an outstanding duel invitation. Only works if you have an outstanding
+  duel invitation from another player.
+ If you specify a message, dicebot will relay that to the challenger.
+
+.retract,.maybenot
+ Removes a duel invitation that you issued. Only works if you have an
+  outstanding duel invitation that you issued, and if it hasn't been accepted
+  yet.
+
+.attack,.attack!
+ Attack the opposing player! Depending on the stage, either:
+  1 - rolls your attack stat to see your chance to hit the opponent (leads to
+      stage 2 if more than 0, otherwise leads to stage 1 for opponent's attack)
+  3 - rolls the difference between your attack roll in stage 1 and the
+      opponent's defense roll in stage 2 to determine damage (leads to stage 1,
+      for opponent's attack, unless they are stunned, in which case it is your
+      attack again)
+  4 - rolls a number of dice determined in stage 3 if you parried. (leads to
+      stage 1, for your attack)
+ Does not work if it is not both one of the above stages and your turn, and you
+  are in a duel.
+
+.defend
+ Defend against the opposing player! Only works if you are in stage 2 of an
+  active duel, but a number of things can happen during this stage:
+  > if the attacker's strength roll (determined during stage 1) is twice or more
+    the defender's defense, the defender is marked as stunned. If the attacker
+    has a lower attack roll than the defender's defense roll, then it goes back
+    to stage 1, maintaining roles.
+  > if the average of the defender's dexterity roll (determined during this
+    stage) and defense roll are double or more the attacker's attack roll, the
+    attack is parried, meaning no damage for the attacker regardless of dice,
+    and it moves onto stage 4 with the defender having the opportunity to
+    attack, with the dice being equal to the difference.
+  > if both of the above conditions are true, then whichever total is greater
+    (att + str vs def + dex) triggers the respective effect. if both totals are
+    equal, neither effect happens.
+
+.forfeit
+ Does what it says on the box. Doesn't work if you're not in a duel.
+
+.equipped
+ Shows what you have equipped. If nothing, indicates as much.
+
+.inventory
+ Shows what's in your inventory, i.e. items you have but are not
+  wearing/wielding. Shows the name of the item and the unique ID associated with
+  it.
+
+.equip <ID> ('main'|'off')
+ Equips item number <ID> from your inventory, if the slot it would go into isn't
+  occupied. If the item is a one-handed weapon (that is, can be wielded in either
+  hand), you need to specify which hand it goes in: either main, or off. The item
+  needs to be in your inventory for this to work.
+
+.unequip <slot>
+ Unequips the item worn/wielded in <slot>. Options are head, shoulders, hands,
+  legs, feet, and back for armour; and main and off for weapons. If a two-handed
+  weapon is being unequipped, picking either main or off will remove it from both
+  slots.
+
+.debug <'commit'|command>
+ Executes a database query. Will not work if the player's name isn't in the
+  DEBUGGERS list. Choosing commit will commit any executed queries to the
+  database, otherwise everything after .debug will be interpreted as a query and
+  sent to the MySQL server (without committing any changes made). Note that you
+  cannot obtain any information this way, you can only change it.
+
+.admin <command> (options)
+ Runs an admin command. Will not work unless the user's name is in the ADMINS
+  list. Options for this are the list and give commands, so far. When using list,
+  you can choose either duels, which will list all duel historical data, and
+  items, which will list all item definitions. When using give, you specify the
+  user, and the name of the item you want to grant them. If both the user and the
+  item exist, it will be created and moved to the player's inventory.
