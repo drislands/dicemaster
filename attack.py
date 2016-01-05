@@ -249,7 +249,7 @@ def getStatus(ID):
 
 ################
 # Getters for equipment-based information
-# TODO: make this stuff lol TODO
+# TODO: make getters that determine stats after modifiers are taken into account
 def getInventory(ID):
 	cur.execute('SELECT * FROM inventory WHERE ID=%s' % ID)
 	return cur.fetchone()
@@ -299,6 +299,26 @@ def getArmourSlot(ID):
 	cur.execute('SELECT Slot FROM armour_definitions WHERE itemid=%s' % ID)
 	return cur.fetchone()[0]
 
+# get the list of parts for a piece of armour
+def getArmourParts(ID):
+	cur.execute('SELECT Part1,Part2,Part3 FROM armour_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()
+
+# get the list of parts for a weapon
+def getWeaponParts(ID):
+	cur.execute('SELECT Part1,Part2,Part3 FROM weapon_definitions WHERE itemid=%s' % ID)
+	return cur.fetchone()
+
+# get passive effect ID from armour
+def getArmourPE(ID):
+	cur.execute('SELECT PassiveEffect FROM armour_parts WHERE partid=%s' % ID)
+	return cur.fetchone()[0]
+
+# get passive effect ID from weapon
+def getWeaponPE(ID):
+	cur.execute('SELECT PassiveEffect FROM weapon_parts WHERE partid=%s' % ID)
+	return cur.fetchone()[0]
+
 ###
 # add item to inventory
 def addToInventory(PID,IID):
@@ -323,6 +343,28 @@ def removeFromInventory(PID,IID):
 		cur.execute('UPDATE inventory SET Inventory=null')
 	db.commit()
 
+###
+# get True HP (based on own items)
+def getTrueMaxHP(ID):
+	inventory = getInventory(ID)
+	inventory.pop(0)
+	inventory.pop(8)
+	total = getMaxHP(ID)
+	for x in inventory:
+		if x:
+			if getItemType(getExistID(x))=='armour':
+				parts = getArmourParts(getExistID(x))
+			else:
+				parts = getWeaponParts(getExistID(x))
+			for y in parts:
+				cur.execute('SELECT Scope,Stat,Modifier,IsSpecial FROM passive_effects WHERE effectid=%d' % getArmourPE(y))
+				effects = cur.fetchone()
+				if effects(1)=='hp' and not effects(3) and (effects(0)=='self' or effects(0)=='team'):
+					total = total + int(effects(2))
+			
+	##if # TODO: ADD HP EFFECTS FROM ANY BUFFS OR DEBUFFS. MAYBE LEAVE FOR NEXT UPDATE?
+	## TODO: FINISH THE FUNCTION
+				
 #
 ################
 
